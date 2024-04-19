@@ -2,6 +2,9 @@
 
 An type supported [Eleventy](https://www.11ty.dev/) `defineConfig` wrapper. This module can be dropped in to your `.eleventy.js` configuration file and provided type support to the entire 11ty API, with JSDoc annotated descriptions and documentation linked references.
 
+
+<video src='https://github.com/panoply/e11ty/blob/6c6bf6d2318f871f263a861d4305a2d9eaf09f70/plugins/11ty.ts/preview.mp4' />
+
 ### Why?
 
 Type support is assumed nowadays and when modules don't provide this basic capability it makes life difficult and reflects poorly on otherwise good projects (like Eleventy). The team behind Eleventy have floated type support but seem hesitant and from my understanding were considering using JSDoc types (We live in a society, We are not animals). The last time I actively looked in the issues it was clear and rather apparent that those discussing type support or working on it were not very well versed on the subject (imo).
