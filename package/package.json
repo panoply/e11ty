@@ -1,0 +1,37 @@
+{
+  "name": "e11ty",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup --minify",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "files": [
+    "dist",
+    "LICENSE",
+    "readme.md"
+  ],
+  "module": "./dist/index.mjs",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "import": {
+      "default": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    },
+    "require": {
+      "default": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "dependencies": {
+    "11ty.ts": "workspace:^",
+    "@e11ty/eleventy-plugin-html-terser": "workspace:^",
+    "@e11ty/eleventy-plugin-markdown": "workspace:^",
+    "@e11ty/eleventy-plugin-svg-sprite": "workspace:^"
+  }
+}

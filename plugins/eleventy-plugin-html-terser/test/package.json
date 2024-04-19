@@ -1,0 +1,23 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "11ty-html-terser": "link:..",
+    "11ty.ts": "link:../../11ty.ts",
+    "@11ty/eleventy": "^2.0.1",
+    "@sissel/11ty-html-terser": "link:..",
+    "eleventy-plugin-activity-pub": "^0.1.1",
+    "eleventy-plugin-lazyimages": "^2.1.2"
+  },
+  "dependencies": {
+    "eleventy-plugin-icons": "^4.5.0"
+  }
+}

@@ -1,0 +1,7 @@
+packages:
+  - '.'
+  - 'plugins/11ty.ts'
+  - 'plugins/eleventy-plugin-html-terser'
+  - 'plugins/eleventy-plugin-svg-sprite'
+  - 'plugins/eleventy-plugin-markdown'
+  - 'package/e11ty'

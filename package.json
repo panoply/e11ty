@@ -1,0 +1,38 @@
+{
+  "name": "@e11ty/mono",
+  "version": "0.0.1",
+  "private": true,
+  "description": "An 11ty strap containing a refined list of plugins.",
+  "scripts": {
+    "dev": "conc --restart-tries 2 -n \"11ty.ts,eleventy-plugin-html-terser,eleventy-plugin-markdown,eleventy-plugin-svg-sprite,e11ty\" -c \"#81D4FA,#FF69B,#9370DB,#1E90FF,#00CED1\" \"pnpm @11ty dev\" \"pnpm @terser dev\" \"pnpm @markdown dev\" \"pnpm @sprite dev\" \"pnpm @e11ty dev\"",
+    "build": "pnpm --shell-mode exec \"./build.sh\"",
+    "@11ty": "pnpm run -F 11ty.ts",
+    "@terser": "pnpm -r run -F @e11ty/eleventy-plugin-html-terser",
+    "@markdown": "pnpm run -F @e11ty/eleventy-plugin-markdown",
+    "@sprite": "pnpm run -F @e11ty/eleventy-plugin-svg-sprite",
+    "@e11ty": "pnpm run -F \"./package/*\"",
+    "postversion": "pnpm bump",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prettier": "@sissel/prettier-config",
+  "eslintConfig": {
+    "extends": "@sissel/eslint-config",
+    "ignorePatterns": [
+      "dist",
+      "*.cjs",
+      "*.mjs",
+      "*.d.ts"
+    ]
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@sissel/eslint-config": "^1.2.1",
+    "@sissel/prettier-config": "^1.2.5",
+    "@sissel/tsconfig": "^1.0.0",
+    "concurrently": "^8.2.2",
+    "tsup": "^8.0.2"
+  },
+  "peerDependencies": {
+    "@11ty/eleventy": "^2.0.1"
+  }
+}

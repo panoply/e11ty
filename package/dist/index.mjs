@@ -1,0 +1,1 @@
+import{defineConfig as o}from"11ty.ts";import{terser as f}from"@e11ty/eleventy-plugin-html-terser";import{sprite as p}from"@e11ty/eleventy-plugin-svg-sprite";import{markdown as x}from"@e11ty/eleventy-plugin-markdown";export{o as eleventy,x as markdown,p as sprite,f as terser};
