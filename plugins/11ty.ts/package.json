@@ -20,7 +20,8 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/panoply/e11ty/plugins/11ty.ts"
+    "url": "https://github.com/panoply/e11ty.git",
+    "directory": "plugins/11ty.ts"
   },
   "bugs": {
     "url": "https://github.com/panoply/e11ty/issues"
