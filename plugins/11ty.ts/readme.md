@@ -20,7 +20,7 @@ Type support is assumed nowadays and when modules don't provide this basic capab
 The module requires [@11ty/eleventy](https://www.npmjs.com/package/@11ty/eleventy) be installed along side it.
 
 ```cli
-pnpm add 11ty.ys @11ty/eleventy -D
+pnpm add 11ty.ts @11ty/eleventy -D
 ```
 
 > The `@11ty/eleventy` module is a peer. You need to install it.
