@@ -210,7 +210,11 @@ export function sprite (eleventyConfig: EleventyConfig, pluginConfig: ISVGSprite
     svgSpriteShortcodeList.push(config.spriteShortCode);
 
     const svgSpriteInstance = SVGSprite(config);
-    eleventyConfig.on('eleventy.before', async () => { await svgSpriteInstance.compile(); });
+
+    eleventyConfig.on('eleventy.before', async () => {
+      await svgSpriteInstance.compile();
+    });
+
     eleventyConfig.addShortcode(config.spriteShortCode, () => {
       return svgSpriteInstance.getSprite(config.spriteShortCode) || '';
     });

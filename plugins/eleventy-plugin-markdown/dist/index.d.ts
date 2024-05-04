@@ -1052,7 +1052,7 @@ interface CodeBlocks {
 }
 interface IMarkdown {
     /**
-     * Papyrus Syntax Highlighting
+     * Exposes `syntax()` method.
      */
     syntax?: (options: CodeBlocks) => string;
     /**

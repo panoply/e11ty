@@ -43,7 +43,14 @@ export function terser (
 
       } catch (error) {
 
-        console.error(error);
+        const SEP = '\n\n------------------------------------------------------------\n\n';
+
+        console.error(
+          SEP,
+          ' HTML TERSER ERROR\n\n',
+          error,
+          SEP
+        );
 
       }
 
