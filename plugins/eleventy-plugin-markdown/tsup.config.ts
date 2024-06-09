@@ -13,6 +13,7 @@ export default defineConfig(
           esModuleInterop: true
         }
       },
+      external: ['papyrus'],
       platform: 'node',
       format: [
         'cjs'
@@ -22,6 +23,7 @@ export default defineConfig(
       entry: [ './index.ts' ],
       outExtension: () => ({ js: '.mjs' }),
       platform: 'node',
+      external: ['papyrus'],
       format: [
         'esm'
       ]

@@ -30,7 +30,7 @@
     "@sissel/prettier-config": "^1.2.5",
     "@sissel/tsconfig": "^1.0.0",
     "concurrently": "^8.2.2",
-    "tsup": "^8.0.2"
+    "tsup": "^8.1.0"
   },
   "peerDependencies": {
     "@11ty/eleventy": "^2.0.1"

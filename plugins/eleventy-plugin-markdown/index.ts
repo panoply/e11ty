@@ -119,7 +119,7 @@ function papyrusHighlight (options: IMarkdown['papyrus'], { raw, language }) {
 
 };
 
-const grid = (md: md) => function (tokens: MarkdownIt.Token[], idx: number) {
+const grid = (md: md) => function (tokens: md.Token[], idx: number) {
 
   if (tokens[idx].nesting === 1) {
     const col = tokens[idx].info.trim().match(/^grid\s+(.*)$/);
@@ -130,7 +130,7 @@ const grid = (md: md) => function (tokens: MarkdownIt.Token[], idx: number) {
 
 };
 
-function notes (tokens: MarkdownIt.Token[], index: number) {
+function notes (tokens: md.Token[], index: number) {
 
   return tokens[index].nesting === 1 ? '<blockquote class="note">' : '</blockquote>';
 
