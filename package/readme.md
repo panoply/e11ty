@@ -16,13 +16,11 @@ pnpm add e11ty -D
 const { eleventy, markdown, sprite, terser } = require('e11ty');
 
 module.exports = eleventy(function (eleventyConfig) {
+  markdown(eleventyConfig, {});
 
-  markdown(eleventyConfig, {})
+  eleventyConfig.addPlugin(sprite, {});
+  eleventyConfig.addPlugin(terser, {});
 
-  eleventyConfig.addPlugin(sprite, {})
-  eleventyConfig.addPlugin(terser, {})
-
-  return {}
-
+  return {};
 });
 ```
