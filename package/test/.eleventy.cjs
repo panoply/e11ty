@@ -1,4 +1,5 @@
 const { eleventy, markdown, sprite, terser } = require('e11ty');
+const papyrus = require('papyrus');
 
 module.exports = eleventy(function (config) {
 
@@ -7,12 +8,9 @@ module.exports = eleventy(function (config) {
   // The syntax callback function will return the extracted
   // code block regions in .md files.
   markdown(config, {
-    papyrus: {
-      language: {
-        javascript: {
-          editor: true
-        }
-      }
+    highlight: {
+      block:({ raw, language }) => papyrus.highlight(raw, { language }),
+      inline: ({ raw, language }) => papyrus.inline(raw, { language })
     },
     options: {
       breaks: true,

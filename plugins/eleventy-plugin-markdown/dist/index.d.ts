@@ -1,6 +1,5 @@
 /// <reference types="node" />
 import md, { Options } from 'markdown-it';
-import { StaticOptions } from 'papyrus';
 
 /**
 Matches any [primitive value](https://developer.mozilla.org/en-US/docs/Glossary/Primitive).
@@ -1050,31 +1049,67 @@ interface CodeBlocks {
      */
     escape(): string;
 }
+interface CodeInline {
+    /**
+     * The Code Block Language ID, e.g: ``{js} foo.method()`` > `javascript`
+     */
+    language: Languages;
+    /**
+     * The inner contents of the inline region
+     */
+    raw: string;
+}
+interface IPapyrus {
+    /**
+     * Inline `<code>` Highlighting. Enables markdown inline code highlighting.
+     * Express inline markdown as:
+     *
+     * ```
+     * `{js} foo.method()` will highlight to JavaScript
+     * ```
+     */
+    inline?: boolean;
+    /**
+     * Whether to use `papyrus.static()` OR `papyrus.highlight()`.
+     *
+     * - Using `static` will render editor mode
+     * - Using `highlight` will render readonly code block only
+     *
+     * @default 'highlight'
+     */
+    render?: 'static' | 'highlight';
+}
 interface IMarkdown {
     /**
      * Exposes `syntax()` method.
      */
-    syntax?: (options: CodeBlocks) => string;
-    /**
-     * Papyrus Language Settings
-     */
-    papyrus?: {
+    highlight?: {
         /**
-         * Default rendering options
+         * Callback function for applying Syntax Highlighting within a
+         * codeblock of markdown.
          */
-        default?: Omit<StaticOptions, 'language'>;
+        block(options: CodeBlocks): string;
         /**
-         * Per~Language Rendering options
+         * Inline `<code>` Highlighting. Enables markdown inline code highlighting.
+         * Express inline markdown as:
+         *
+         * ```
+         * `{js} foo.method()` will highlight to JavaScript
+         * ```
          */
-        language?: {
-            [K in Languages]?: Omit<StaticOptions, 'language'>;
-        };
+        inline(options: CodeInline): string;
     };
+    /**
+     * Whether or not block quotes should apply `note` class name, e.g: `<blockquote class="note">`.
+     *
+     * @default true
+     */
+    blocknote?: boolean;
     /**
      * Markdown IT Config
      */
     options?: Omit<Options, 'highlight'>;
 }
-declare function markdown(eleventy: EleventyConfig, options: IMarkdown): md;
+declare function markdown(eleventy: EleventyConfig, options?: IMarkdown): md;
 
-export { type CodeBlocks, type IMarkdown, type Languages, markdown };
+export { type CodeBlocks, type CodeInline, type IMarkdown, type IPapyrus, type Languages, markdown };

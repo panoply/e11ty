@@ -12,6 +12,7 @@
   "license": "ISC",
   "devDependencies": {
     "@11ty/eleventy": "^2.0.1",
-    "e11ty": "link:.."
+    "e11ty": "link:..",
+    "papyrus": "github:panoply/papyrus#sin"
   }
 }

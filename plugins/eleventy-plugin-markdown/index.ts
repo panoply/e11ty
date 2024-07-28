@@ -2,10 +2,9 @@
 import type { LiteralUnion } from 'type-fest';
 import type { EleventyConfig } from '11ty.ts';
 import type { Options } from 'markdown-it';
-import type { StaticOptions } from 'papyrus';
-import papyrus from 'papyrus';
 import md from 'markdown-it';
 import mdcontainer from 'markdown-it-container';
+
 
 export type Languages = LiteralUnion<(
   | 'html'
@@ -39,39 +38,81 @@ export interface CodeBlocks {
   escape(): string;
 }
 
+export interface CodeInline {
+  /**
+   * The Code Block Language ID, e.g: ``{js} foo.method()`` > `javascript`
+   */
+  language: Languages;
+  /**
+   * The inner contents of the inline region
+   */
+  raw: string;
+}
+
+export interface IPapyrus {
+
+  /**
+   * Inline `<code>` Highlighting. Enables markdown inline code highlighting.
+   * Express inline markdown as:
+   *
+   * ```
+   * `{js} foo.method()` will highlight to JavaScript
+   * ```
+   */
+  inline?: boolean;
+  /**
+   * Whether to use `papyrus.static()` OR `papyrus.highlight()`.
+   *
+   * - Using `static` will render editor mode
+   * - Using `highlight` will render readonly code block only
+   *
+   * @default 'highlight'
+   */
+  render?: 'static' | 'highlight';
+}
+
+
 export interface IMarkdown {
   /**
    * Exposes `syntax()` method.
    */
-  syntax?: (options: CodeBlocks) => string;
-  /**
-   * Papyrus Language Settings
-   */
-  papyrus?: {
+  highlight?: {
     /**
-     * Default rendering options
+     * Callback function for applying Syntax Highlighting within a
+     * codeblock of markdown.
      */
-    default?: Omit<StaticOptions, 'language'>,
+    block(options: CodeBlocks): string;
     /**
-     * Per~Language Rendering options
+     * Inline `<code>` Highlighting. Enables markdown inline code highlighting.
+     * Express inline markdown as:
+     *
+     * ```
+     * `{js} foo.method()` will highlight to JavaScript
+     * ```
      */
-    language?: {
-      [K in Languages]?: Omit<StaticOptions, 'language'>
-    }
+    inline(options: CodeInline): string;
   };
+  /**
+   * Whether or not block quotes should apply `note` class name, e.g: `<blockquote class="note">`.
+   *
+   * @default true
+   */
+  blocknote?: boolean;
   /**
    * Markdown IT Config
    */
   options?: Omit<Options, 'highlight'>;
 }
 
+
+const SEP = `\n\n${'-'.repeat(50)}\n\n`;
+
+
 /**
  * Prints an error to the console when an issue occurs during the
  * `highlightCode` function.
  */
 function highlightError (language: Languages, error: string) {
-
-  const SEP = '\n\n------------------------------------------------------------\n\n';
 
   console.error(
     SEP,
@@ -87,7 +128,11 @@ function highlightCode (md: md, raw: string, language: string) {
 
   if (language) {
     try {
-      return <CodeBlocks>{ language, raw, escape: () => md.utils.escapeHtml(raw) };
+      return <CodeBlocks>{
+        language,
+        raw,
+        escape: () => md.utils.escapeHtml(raw)
+      };
     } catch (err) {
       highlightError(language, err);
       return md.utils.escapeHtml(raw);
@@ -98,26 +143,6 @@ function highlightCode (md: md, raw: string, language: string) {
 
 };
 
-/**
- * Papyrus Syntax
- *
- * Highlighting code blocks of markdown annotated regions of input.
- */
-function papyrusHighlight (options: IMarkdown['papyrus'], { raw, language }) {
-
-  if (options?.language) {
-    if (language in options.language) {
-      return papyrus.static(raw, { language, ...options.language[language] });
-    }
-  }
-
-  if (options?.default) {
-    return papyrus.static(raw, { language, ...options.default });
-  }
-
-  return papyrus.static(raw, { language });
-
-};
 
 const grid = (md: md) => function (tokens: md.Token[], idx: number) {
 
@@ -130,41 +155,86 @@ const grid = (md: md) => function (tokens: md.Token[], idx: number) {
 
 };
 
+
+/**
+ * Renders inline code blocks
+ */
+const codeinline = (callback: (params: {
+  raw: string;
+  language: Languages
+}) => string) => function (md: md) {
+
+
+  function render (token: string) {
+
+    const pull = token.indexOf('} ')
+    const raw = token.slice(pull + 1).trimStart()
+    const language = token.slice(1, pull)
+
+    return callback({ raw, language})
+
+  }
+
+  function scan (state: md.StateBlock) {
+
+    for (let x = state.tokens.length - 1; x >= 0; x--) {
+
+      if (state.tokens[x].type !== 'inline') continue
+
+      const token = state.tokens[x].children
+
+      for (let i = token.length - 1; i >= 0; i--) {
+        if (token[i].type !== 'code_inline') continue;
+        if(!/^{\w+} /.test(token[i].content)) continue
+        token[i].tag = ''
+        token[i].type = 'html_block',
+        token[i].markup = ''
+        token[i].block = true,
+        token[i].content = render(token[i].content);
+      }
+    }
+  }
+
+
+  // @ts-ignore
+  md.core.ruler.push('inline_papyrus', scan)
+
+}
+
+
+
 function notes (tokens: md.Token[], index: number) {
 
   return tokens[index].nesting === 1 ? '<blockquote class="note">' : '</blockquote>';
 
 }
 
-export function markdown (eleventy: EleventyConfig, options: IMarkdown) {
+export function markdown (eleventy: EleventyConfig, options: IMarkdown = { options: {} }) {
 
-  const opts = Object.assign<Options, IMarkdown['options']>({
+  const opts = Object.assign({
     html: true,
     linkify: true,
     typographer: true,
     breaks: false
   }, options.options);
 
+  const blockFn = options?.highlight?.block;
+  const inlineFn = options?.highlight?.inline;
+
+  if (typeof options?.blocknote !=='boolean') options.blocknote = true
+
   const markdown = md('default', {
     ...opts,
-    highlight: (string, lang) => {
-
-      const syntax = highlightCode(markdown, string, lang);
-
-      if (typeof syntax === 'object') {
-        if (options.papyrus) {
-          return papyrusHighlight(options.papyrus, syntax);
-        } else if (options.syntax) {
-          return options.syntax(syntax);
-        }
-      }
-
+    highlight: (string, language) => {
+      const syntax = highlightCode(markdown, string, language);
+      if (blockFn && typeof syntax === 'object') return blockFn(syntax);
       return string;
-
     }
   });
 
-  markdown.use(mdcontainer, 'note', { render: notes });
+  if(inlineFn) markdown.use(codeinline(inlineFn))
+  if (options.blocknote) markdown.use(mdcontainer, 'note', { render: notes });
+
   markdown.use(mdcontainer, 'grid', { render: grid(markdown) });
   markdown.disable('code');
 

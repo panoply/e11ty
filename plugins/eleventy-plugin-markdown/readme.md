@@ -1,4 +1,3 @@
-
 # @e11ty/eleventy-plugin-markdown
 
 An [Eleventy](https://www.11ty.dev/) plugin wrapped around [markdown-it](https://github.com/markdown-it/markdown-it) which exposed some basic logic used in the static sites I build leveraging 11ty.
@@ -21,17 +20,22 @@ The module includes markdown-it and papyrus in the build, it also has built in f
 ```ts
 const { defineConfig } = require('11ty.ts'); // Optional
 const { markdown } = require('@e11ty/eleventy-plugin-markdown');
+const papyrus = require('papyrus');
 
 module.exports = defineConfig(eleventyConfig => {
 
   markdown(eleventyConfig, {
-    papyrus: {
-      default: { /* Papyrus Syntax Defaults*/ },
-      language: {
-        liquid: { /* Papyrus Liquid Code Blocks */ },
-      }
+    blocknote: true,
+    options: {
+      html: true,
+      linkify: true,
+      typographer: true,
+      breaks: false
     },
-    options: { /* options for markdown-it */ }
+    highlight: {
+      block: ({ raw, language, escape }) => papyrus.highlight(raw, { language }),
+      inline: ({ raw, language }) => papyrus.inline(raw, { language })
+    },
   })
 
 });

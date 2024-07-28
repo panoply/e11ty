@@ -9,6 +9,10 @@ permalink: '/index.html'
 const foo = 'bar';
 ```
 
+# Inline Code
+
+Highlight as JavaScript `{js} foo.method()`, this as CSS `{css} .class { font-size: 10px }`, this as HTML `{html} <h1>Testing</h1>`
+
 # Containers
 
 ---
