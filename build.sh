@@ -21,6 +21,10 @@ pnpm @markdown build
 task PLUGIN @e11ty/eleventy-plugin-svg-sprite
 pnpm @sprite build
 
+# FUSE
+task PLUGIN @e11ty/eleventy-plugin-json-fuse
+pnpm @fuse build
+
 # E11TY
-task E11TY e11ty
-cd package && pnpm build && cd ..
+task PLUGIN e11ty
+pnpm @e11ty build
