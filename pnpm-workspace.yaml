@@ -4,5 +4,5 @@ packages:
   - 'packages/eleventy-plugin-html-terser'
   - 'packages/eleventy-plugin-svg-sprite'
   - 'packages/eleventy-plugin-markdown'
-  - 'packages/eleventy-plugin-json-fuse'
+  - 'packages/eleventy-plugin-json-fusion'
   - 'packages/e11ty'
