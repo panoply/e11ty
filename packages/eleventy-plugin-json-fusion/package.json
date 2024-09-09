@@ -1,5 +1,5 @@
 {
-  "name": "@e11ty/eleventy-plugin-json-fuse",
+  "name": "@e11ty/eleventy-plugin-json-fusion",
   "version": "0.0.1",
   "description": "11ty plugin for generating JSON structures from markdown site files for usage by fuse.js",
   "module": "./dist/index.mjs",
@@ -17,7 +17,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/panoply/e11ty/plugins/eleventy-plugin-json-fuse"
+    "url": "https://github.com/panoply/e11ty.git",
+    "directory": "packages/eleventy-plugin-json-fusion"
   },
   "bugs": {
     "url": "https://github.com/panoply/e11ty/issues"
@@ -40,7 +41,7 @@
       "dist"
     ]
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "devDependencies": {
     "11ty.ts": "workspace:^",
     "type-fest": "^4.26.1"

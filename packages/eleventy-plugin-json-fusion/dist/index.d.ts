@@ -980,37 +980,50 @@ interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
 type ContentTypes = 'paragraph' | 'blockquote' | 'codeblock' | 'list';
 interface PluginOptions {
     /**
-     * The output path the generated JSON file should be written.
+     * Output path that the generated JSON file should be written. By default,
+     * the file will be written the the root directory of your defined `output`.
      *
      * @default '.'
      */
     output?: string;
     /**
-     * Minified
+     * Whether or not the JSON file should output minified.
      *
      * @default false
      */
     minify?: boolean;
     /**
-     * The name of the shortCode
+     * The name of the shortCode to use.
      *
      * @default 'search'
      */
     shortCode?: string;
     /**
-     * Ignore Pattern for skipping certain syntax occurances, typically found with template languages.
-     * By default, only Liquid delimiter occurrences are ignored
+     * A list of language identifier code blocks that should be
+     * included in generated output.
      *
-     * @default /^({{|{%|<[a-z]|:::)/
+     * @default ['bash']
      */
-    syntaxIgnores?: RegExp;
+    codeblock?: string[];
     /**
-     * An array list of headings to ignore from processing. Use lowercase format, as matches
-     * will be converted to lowercase before checking.
-     *
-     * @default []
+     * Pattern matches to ignore from processing
      */
-    headingIgnores?: Lowercase<string>[];
+    ignore?: {
+        /**
+         * Ignore Pattern for skipping certain syntax occurances, typically found with template languages.
+         * By default, only Liquid delimiter occurrences are ignored
+         *
+         * @default /^({{|{%|<[a-z]|:::|> \:[a-z])/
+         */
+        syntax?: RegExp[];
+        /**
+         * An array list of heading occurances to ignore from processing. Can either be regular expression
+         * or a lowercase string to match against.
+         *
+         * @default []
+         */
+        heading?: (RegExp | Lowercase<string>)[];
+    };
     /**
      * Content Parse Types
      *
@@ -1018,20 +1031,106 @@ interface PluginOptions {
      * [
      *   'paragraph',
      *   'blockquote',
-     *   'codeblock',
      *   'list'
      * ]
      */
-    contentTypes?: ContentTypes[];
+    content?: ContentTypes[];
+    /**
+     * Content is grouped according to heading occurences. For every heading, a new region
+     * is generated and concatenated into the page `content` array.
+     *
+     * > **Return `false`**
+     * >
+     * > Return a value of `false` to skip processing a certain heading region.
+     *
+     * > **Return `string`**
+     * >
+     * > Return a `string` value to replace the heading.
+     */
+    onHeading(heading: string): boolean | string | void;
     /**
      * Callback method which will be triggered for each page that has been parsed.
+     *
+     * > **Return `false`**
+     * >
+     * > Return a value of `false` to skip processing a certain heading region.
+     *
+     * > **Return `string`**
+     * >
+     * > Return a `string` value to replace the heading.
      */
-    onHeading(heading: string): string | void;
+    onContent(text: string, type?: ContentTypes, language?: string): boolean | string | void;
     /**
      * Callback method which will be triggered for each page that has been parsed.
+     *
+     * > **Return `false`**
+     * >
+     * > Return a value of `false` to skip processing a certain heading region.
+     *
+     * > **Return `string`**
+     * >
+     * > Return a `string` value to replace the heading.
      */
-    onText(text: string): string | void;
+    onOutput(json: Page[]): boolean | any[] | void;
 }
-declare function fuse(eleventyConfig: EleventyConfig, config?: PluginOptions): void;
+interface PageContent {
+    /**
+     * Heading from a page markdown
+     */
+    heading: string;
+    /**
+     * Content within this heading region
+     */
+    content: Array<{
+        /**
+         * The contents text
+         */
+        text: string;
+        /**
+         * The type of text content
+         */
+        type: ContentTypes;
+    } | {
+        /**
+         * The contents text
+         */
+        text: string;
+        /**
+         * The type of text content
+         */
+        type: ContentTypes;
+        /**
+         * The type of text content
+         */
+        language?: string;
+    }>;
+    /**
+     * Page url and anchor reference
+     */
+    url: string;
+}
+interface Page {
+    /**
+     * The page title, extracted from frontmatter
+     */
+    page: string;
+    /**
+     * The page description, extracted from frontmatter
+     */
+    description: string;
+    /**
+     * The page url, extracted from 11ty context `this.page.url`
+     */
+    url: string;
+    /**
+     * The page tags,  extracted from frontmatter
+     */
+    tags: string[];
+    /**
+     * The contents of the page
+     */
+    content: Array<PageContent>;
+}
+declare function fusion(eleventyConfig: EleventyConfig, options?: PluginOptions): void;
 
-export { fuse };
+export { fusion };

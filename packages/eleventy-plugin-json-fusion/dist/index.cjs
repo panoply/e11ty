@@ -47,11 +47,11 @@ var __async = (__this, __arguments, generator) => {
 };
 
 // index.ts
-var eleventy_plugin_json_fuse_exports = {};
-__export(eleventy_plugin_json_fuse_exports, {
-  fuse: () => fuse
+var eleventy_plugin_json_fusion_exports = {};
+__export(eleventy_plugin_json_fusion_exports, {
+  fusion: () => fusion
 });
-module.exports = __toCommonJS(eleventy_plugin_json_fuse_exports);
+module.exports = __toCommonJS(eleventy_plugin_json_fusion_exports);
 var import_marked = __toESM(require("marked"));
 var import_gray_matter = __toESM(require("gray-matter"));
 
@@ -93,41 +93,61 @@ function write(filePath, data) {
     }
   });
 }
-function fuse(eleventyConfig, config) {
-  const options = Object.assign({
-    onText: null,
+function fusion(eleventyConfig, options) {
+  const opts = Object.assign({
+    onContent: null,
     onHeading: null,
+    onOutput: null,
     minify: false,
-    contentTypes: ["blockquote", "paragraph", "list", "codeblock"],
-    headingIgnores: [],
     output: "",
     shortCode: "search",
-    syntaxIgnores: /^({{|{%|<[a-z]|:::)/g
-  }, config);
+    codeblock: [],
+    ignore: Object.assign({}, options == null ? void 0 : options.ignore),
+    content: [
+      "blockquote",
+      "paragraph",
+      "list"
+    ],
+    codeblocks: [
+      "bash"
+    ]
+  }, options);
+  if (!("heading" in opts.ignore)) opts.ignore.heading = [];
+  if (!("syntax" in opts.ignore)) opts.ignore.syntax = [/^({{|{%|<[a-z]|:::)/g];
   let pages = [];
   let outputPath;
-  eleventyConfig.addShortcode(options.shortCode, FuseJson);
+  const hasOutputHook = opts.onOutput !== null && typeof opts.onOutput === "function";
+  const allowParagraph = opts.content.includes("paragraph");
+  const allowBlockquote = opts.content.includes("blockquote");
+  const allowList = opts.content.includes("list");
+  const ignoreHeading = (heading) => opts.ignore.heading.some((match) => {
+    return typeof match === "string" ? match === heading.toLowerCase() : match.test(heading);
+  });
+  const ignoreSyntax = (content) => opts.ignore.syntax.some((match) => match.test(content));
+  eleventyConfig.addShortcode(opts.shortCode, FuseJson);
   eleventyConfig.on("eleventy.after", () => __async(this, null, function* () {
     if (pages.length > 0) {
       if (!outputPath) {
-        throw Error("[plugin-json-fuse] failed to obtain the output path");
+        throw new Error("[plugin-json-fusion] failed to obtain the output path");
       }
-      const content = JSON.stringify(pages, null, options.minify ? 0 : 2);
-      yield write(outputPath, content);
+      let output = JSON.stringify(pages, null, opts.minify ? 0 : 2);
+      if (hasOutputHook) {
+        const returns = opts.onOutput(pages);
+        if (Array.isArray(returns) || typeof returns === "object") {
+          output = JSON.stringify(returns, null, opts.minify ? 0 : 2);
+        }
+      }
+      yield write(outputPath, output);
       pages = [];
       outputPath = void 0;
     }
   }));
-  const allowParagraph = options.contentTypes.includes("paragraph");
-  const allowBlockquote = options.contentTypes.includes("blockquote");
-  const allowCodeblock = options.contentTypes.includes("blockquote");
-  const allowList = options.contentTypes.includes("list");
   function FuseJson(fileName) {
     return __async(this, null, function* () {
       if (!outputPath && this.page.outputPath !== false) {
         const path = (0, import_node_path.dirname)(this.page.outputPath);
         const output = path.replace(this.page.url.slice(0, -1), "");
-        outputPath = (0, import_node_path.join)(process.cwd(), output, options.output, fileName) + ".json";
+        outputPath = (0, import_node_path.join)(process.cwd(), output, opts.output, fileName) + ".json";
       }
       const records = /* @__PURE__ */ new Map();
       const read = yield (0, import_promises.readFile)(this.page.inputPath);
@@ -139,7 +159,7 @@ function fuse(eleventyConfig, config) {
       let heading;
       parse.forEach((token) => {
         if (token.type === "heading") {
-          if (options.headingIgnores.includes(token.text)) {
+          if (ignoreHeading(token.text)) {
             heading = void 0;
             return;
           }
@@ -149,25 +169,25 @@ function fuse(eleventyConfig, config) {
           }
         } else if (records.has(heading)) {
           if (token.type === "paragraph" && allowParagraph) {
-            if (options.syntaxIgnores.test(token.text)) return;
+            if (ignoreSyntax(token.text)) return;
             records.get(heading).push({
               text: token.text,
               type: "paragraph"
             });
           } else if (token.type === "blockquote" && allowBlockquote) {
+            if (ignoreSyntax(token.raw)) return;
             records.get(heading).push({
-              text: token.raw.replace(/^>|\n>/g, ""),
+              text: token.raw.replace(/(^>|\n>)| \:.*(?=[^>])/g, ""),
               type: "blockquote"
             });
-          } else if (token.type === "code" && allowCodeblock) {
-            if (records.has(heading)) {
-              records.get(heading).push({
-                text: token.text,
-                type: "codeblock",
-                language: token.lang
-              });
-            }
+          } else if (token.type === "code" && opts.codeblock.includes(token.lang)) {
+            records.get(heading).push({
+              text: token.text,
+              type: "codeblock",
+              language: token.lang
+            });
           } else if (token.type === "list" && allowList) {
+            if (ignoreSyntax(token.raw)) return;
             records.get(heading).push({
               text: token.raw,
               type: "list"
@@ -184,20 +204,29 @@ function fuse(eleventyConfig, config) {
       };
       for (const heading2 of records.keys()) {
         const pathname = page.url.endsWith("/") ? page.url.slice(0, -1) : page.url;
-        const cbHeading = typeof options.onHeading === "function" ? options.onHeading(heading2) : null;
+        const cbHeading = typeof opts.onHeading === "function" ? opts.onHeading(heading2) : null;
         if (cbHeading === false) continue;
         let content = {
           heading: typeof cbHeading === "string" ? cbHeading : heading2,
-          text: "",
-          type: "paragraph",
-          url: `${pathname}#${slug(heading2)}`,
-          language: void 0
+          content: [],
+          url: `${pathname}#${slug(heading2)}`
         };
-        records.get(heading2).forEach(({ text, type, language }) => {
+        records.get(heading2).forEach(({ text, type, language = void 0 }) => {
           if (typeof text === "string" && text.length > 0) {
-            const cbText = typeof options.onText === "function" ? options.onText(text, type, language) : null;
-            if (cbText === false) return;
-            content.text += typeof cbText === "string" ? cbText : heading2;
+            const cbContent = typeof opts.onContent === "function" ? opts.onContent(text, type, language) : null;
+            if (cbContent === false) return;
+            if (language) {
+              content.content.push({
+                type,
+                text: typeof cbContent === "string" ? cbContent : text
+              });
+            } else {
+              content.content.push({
+                type,
+                text: typeof cbContent === "string" ? cbContent : text,
+                language
+              });
+            }
           }
         });
         page.content.push(content);
@@ -211,5 +240,5 @@ function fuse(eleventyConfig, config) {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  fuse
+  fusion
 });
