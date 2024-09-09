@@ -1,7 +1,7 @@
 {
   "name": "@e11ty/eleventy-plugin-html-terser",
-  "version": "0.0.1",
-  "description": "11ty Plugin which will pass output through HTML Terser",
+  "version": "0.0.2",
+  "description": "Eleventy Plugin which will pass output through HTML Terser",
   "module": "./dist/index.mjs",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -17,7 +17,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/panoply/e11ty/plugins/eleventy-plugin-html-terser"
+    "url": "https://github.com/panoply/e11ty.git",
+    "directory": "packages/eleventy-plugin-html-terser"
   },
   "bugs": {
     "url": "https://github.com/panoply/e11ty/issues"
@@ -40,12 +41,10 @@
       "dist"
     ]
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "devDependencies": {
     "11ty.ts": "workspace:^",
-    "@types/html-minifier-terser": "^7.0.2",
-    "@types/mergerino": "^0.4.5",
-    "type-fest": "^4.15.0"
+    "@types/html-minifier-terser": "^7.0.2"
   },
   "peerDependencies": {
     "@11ty/eleventy": "^2.0.1"
