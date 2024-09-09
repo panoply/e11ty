@@ -393,8 +393,6 @@ export function search (eleventyConfig: EleventyConfig, options?: PluginOptions)
 
         if (token.type === 'paragraph' && allowText) {
 
-          console.log(token.text)
-
           const text = nomark(token.text, {
             stripHtml: opts.stripHtml,
             stripMarkdown: opts.stripMarkdown

@@ -1,6 +1,6 @@
 {
   "name": "@e11ty/eleventy-plugin-search-index",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "11ty plugin for generating JSON structures from markdown site files for creating fuzzy searches.",
   "module": "./dist/index.mjs",
   "main": "./dist/index.js",
