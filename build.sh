@@ -22,7 +22,7 @@ task PLUGIN @e11ty/eleventy-plugin-svg-sprite
 pnpm @sprite build
 
 # FUSE
-task PLUGIN @e11ty/eleventy-plugin-json-fuse
+task PLUGIN @e11ty/eleventy-plugin-json-fusion
 pnpm @fuse build
 
 # E11TY
