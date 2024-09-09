@@ -4,7 +4,7 @@ Shareable [Eleventy](https://www.11ty.dev/) configuration strap. The module acts
 
 # Install
 
-Install as a development dependency. Plugins will be pulled and exposed as named exports. Consult each sub-directory or install the plugins in isolation.
+Install as a development dependency. Plugins will be exposed as named exports. Consult each sub-directory or install the plugins in isolation.
 
 ```cli
 pnpm add e11ty -D
@@ -12,14 +12,17 @@ pnpm add e11ty -D
 
 # Usage
 
+<!-- prettier-ignore -->
 ```js
-const { eleventy, markdown, sprite, terser } = require('e11ty');
+const { defineConfig, markdown, sprite, terser, fuse } = require('e11ty');
 
-module.exports = eleventy(function (eleventyConfig) {
+module.exports = defineConfig(function (eleventyConfig) {
+
   markdown(eleventyConfig, {});
 
   eleventyConfig.addPlugin(sprite, {});
   eleventyConfig.addPlugin(terser, {});
+  eleventyConfig.addPlugin(fusion, {});
 
   return {};
 });
