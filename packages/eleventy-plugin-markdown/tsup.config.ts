@@ -4,6 +4,7 @@ export default defineConfig(
   [
     {
       entry: [ './index.ts' ],
+      noExternal: [ 'github-slugger' ],
       outExtension: () => ({ js: '.cjs' }),
       clean: true,
       dts: {
@@ -20,6 +21,7 @@ export default defineConfig(
     },
     {
       entry: [ './index.ts' ],
+      noExternal: [ 'github-slugger' ],
       outExtension: () => ({ js: '.mjs' }),
       platform: 'node',
       format: [
