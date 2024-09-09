@@ -1,6 +1,6 @@
 # 11ty.ts (Type Support)
 
-An type supported [Eleventy](https://www.11ty.dev/) `defineConfig` wrapper. This module can be dropped in to your `.eleventy.js` configuration file and provided type support to the entire 11ty API, with JSDoc annotated descriptions and documentation linked references.
+Type support for [Eleventy](https://www.11ty.dev/) using `defineConfig` wrapper. This module can be dropped in to your `.eleventy.js` configuration file and will provide type support to the entire 11ty API, with JSDoc annotated descriptions and documentation linked references.
 
 ### Why?
 
@@ -20,8 +20,6 @@ The module requires [@11ty/eleventy](https://www.npmjs.com/package/@11ty/elevent
 ```cli
 pnpm add 11ty.ts @11ty/eleventy -D
 ```
-
-> The `@11ty/eleventy` module is a peer. You need to install it.
 
 # Usage
 
