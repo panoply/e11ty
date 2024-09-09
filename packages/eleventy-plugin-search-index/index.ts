@@ -100,7 +100,7 @@ interface PluginOptions {
    * >
    * > Return a `string` value to replace the heading.
    */
-  onOutput(json: SearchModel): any;
+  onOutput(json: SearchIndex): any;
 }
 
 
@@ -126,13 +126,36 @@ export interface SearchPage {
    */
   tags: string[];
   /**
-   * The index of the containing object (i.e, where page entry exists.)
+   * The page index
    */
-  index: number;
+  pidx: number;
   /**
-   * Content indexes of this page
+   * The heading indexes associated with this page
    */
-  content: number[]
+  hidx:[ start: number, end?: number ]
+  /**
+   * The content indexes associated with this page
+   */
+  cidx: [ start: number, end?: number ]
+}
+
+export interface SearchHeading {
+  /**
+   * Page url and anchor reference `/path#anchor`
+   */
+  anchor: string;
+  /**
+   * The page index
+   */
+  pidx: number;
+  /**
+   * The heading index
+   */
+  hidx: number;
+  /**
+   * The content indexes this heading contains
+   */
+  cidx: [ start: number, end?: number ]
 }
 
 export interface SearchContent {
@@ -149,10 +172,6 @@ export interface SearchContent {
    */
   lang?: string;
   /**
-   * The index of the page reference within `pages[]`
-   */
-  page: number;
-  /**
    * The sort index of the text type.
    *
    * - `1` heading
@@ -165,31 +184,22 @@ export interface SearchContent {
    */
   sort: number;
   /**
-   * The index of the entry within `index[]`
+   * The `pages[]` index location this content belongs
    */
-  index: number;
+  pidx: number;
   /**
-   * The index of the containing object (i.e, where this content entry exists)
+   *The `heading[]` index location this content belongs
+   */
+  hidx: number;
+  /**
+   * This content index.
    */
   cidx: number;
 };
 
-export interface SearchIndex {
-  /**
-   * Page url and anchor reference `/path#anchor`
-   */
-  anchor: string;
-  /**
-   * The heading in which text content exists within.
-   */
-  heading: string;
-  /**
-   * Represents all entries contained in the heading region.
-   */
-  content: SearchContent[];
-}
 
-export interface SearchModel {
+
+export interface SearchIndex {
   /**
    * Pages
    */
@@ -197,7 +207,11 @@ export interface SearchModel {
   /**
    * Indexes
    */
-  index: SearchIndex[];
+  heading: SearchHeading[];
+  /**
+   * Indexes
+   */
+  content: SearchContent[];
 }
 
 
@@ -262,7 +276,7 @@ export function search (eleventyConfig: EleventyConfig, options?: PluginOptions)
 
   }
 
-  const model: SearchModel = { pages: [], index: [] };
+  const model: SearchIndex = { pages: [], heading: [], content: [] };
 
   let outputPath: string;
 
@@ -288,7 +302,7 @@ export function search (eleventyConfig: EleventyConfig, options?: PluginOptions)
 
   eleventyConfig.on('eleventy.after', async () => {
 
-    if (model.index.length > 0 && model.pages.length > 0) {
+    if (model.pages.length > 0 && model.heading.length > 0 && model.content.length > 0) {
 
       if (!outputPath) {
         throw new Error('[plugin-json-fusion] failed to obtain the output path');
@@ -305,8 +319,9 @@ export function search (eleventyConfig: EleventyConfig, options?: PluginOptions)
 
       await write(outputPath, output);
 
-      model.index = [];
       model.pages = [];
+      model.heading = [];
+      model.content = [];
       outputPath = undefined;
 
     }
@@ -402,14 +417,15 @@ export function search (eleventyConfig: EleventyConfig, options?: PluginOptions)
     });
 
     const { url } = this.page
-    const pageIndex = model.pages.length
+    const pidx = model.pages.length
     model.pages.push({
       title: data.title,
       description: data.description || '',
       tags: data.tags || [],
       url,
-      index: pageIndex,
-      content: []
+      pidx,
+      hidx: [model.heading.length],
+      cidx: [model.content.length]
     })
 
     for (const heading of records.keys()) {
@@ -420,20 +436,24 @@ export function search (eleventyConfig: EleventyConfig, options?: PluginOptions)
       if (cbHeading === false) continue;
 
       const headingName = typeof cbHeading === 'string' ? cbHeading : heading;
-      const page: SearchIndex = {
+      const hidx = model.heading.length;
+      const cidx = model.content.length;
+
+      model.heading.push({
         anchor: `${pathname}#${slug(heading)}`,
-        heading: headingName,
-        content: [
-          {
-            text: headingName,
-            type: 'heading',
-            sort: 1,
-            page: pageIndex,
-            cidx: 0,
-            index: model.index.length
-          }
-        ]
-      }
+        hidx,
+        pidx,
+        cidx: [cidx]
+      })
+
+      model.content.push({
+        text: headingName,
+        type: 'heading',
+        sort: 1,
+        hidx,
+        pidx,
+        cidx,
+      })
 
       records.get(heading).forEach(({ text, type, sort, lang = undefined }) => {
 
@@ -449,28 +469,32 @@ export function search (eleventyConfig: EleventyConfig, options?: PluginOptions)
             text: typeof cbContent === 'string' ? cbContent : text,
             type,
             sort,
-            page: pageIndex,
-            cidx: page.content.length,
-            index: model.index.length
+            hidx,
+            pidx,
+            cidx: model.content.length,
           }
 
           if (lang) content.lang = lang
 
-          page.content.push(content);
+          model.content.push(content);
 
 
         }
 
       });
 
-      if (page.content.length > 1) {
+      if (model.content.length > cidx) {
 
-        model.index.push(page);
-        model.pages[pageIndex].content.push(model.index.length - 1)
+        const endcidx = model.content.length - 1
+
+        model.pages[pidx].cidx.push(endcidx);
+        model.heading[hidx].cidx.push(endcidx);
+
       }
 
     }
 
+    model.pages[pidx].hidx.push(model.heading.length - 1)
 
     return '';
 

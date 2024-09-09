@@ -113,19 +113,7 @@ Lorem ipsum dolor
 
 ### JSON Output
 
-Based on the above structure, the object record generated will take the following shape. There are 2 properties in the structure, `pages` and `index`. We can use either reference in our searches, but you'll typically use `index`.
-
-**`index[]`**
-
-The `index` array list will represent all **heading** → **paragraph** text structures. A new record in the array will be created for each **heading** occurrence as that is considered unique. The `content[]` key represents the contents within the heading region.
-
-**pages[]**
-
-The `pages` array list represents our pages. The `content[]` records within `index[]` will hold the indices of their related page, this logic also applies in reverse wherein the `content[]` key within `pages[]` will hold the `content` indices.
-
-**Heading Entries**
-
-You'll notice that `index.content[]` listing always apply `heading`, this is is intentional as we can pass it directly to a third part for referencing.
+Based on the above structure, the object record generated will take the following shape. There are 3 properties in the structure, `pages` and `heading` and `content`, every reference can be associated with one another. You'll _typically_ be using the `content[]` reference for your search client.
 
 <!-- prettier-ignore -->
 ```jsonc
@@ -136,54 +124,57 @@ You'll notice that `index.content[]` listing always apply `heading`, this is is 
       "description": "Hello World",
       "url": "/foo/",
       "tags": ["xxx"],
-      "index": 0,        // index of this entry within pages[]
-      "content": [ 0, 1] // index of the associated index content
+      "pidx": 0,      // page index  (i.e, this index)
+      "hidx": [0, 1], // heading indexes start and end location
+      "cidx": [0, 3], // content indexes start and end location
     }
   ],
-  "index": [
+  "heading": [
     {
       "anchor": "/foo#first-heading",
-      "heading": "Default Structure",
-      "content": [
-        {
-          "text": "Default Structure",
-          "type": "heading",
-          "page": 0,      // index of the page entry within pages[]
-          "index": 0,     // index of this heading entry within index[]
-          "sort": 1,      // sort integer for filtering
-          "cidx": 0,      // index of this entry within content[]
-        },
-        {
-          "text": "Example text",
-          "type": "text", // the type of content
-          "page": 0,      // index of the page entry within pages[]
-          "index": 0,     // index of this heading entry within index[]
-          "sort": 2,      // sort integer for filtering
-          "cidx": 1,      // index of this entry within content[]
-        }
-      ]
+      "pidx": 0,      // page index
+      "hidx": 0,      // heading index (i.e, this index)
+      "cidx": [0, 1], // content indexes start and end location
     },
     {
       "anchor": "/foo#second-heading",
-      "heading": "Second heading",
-      "content": [
-        {
-          "text": "Second heading",
-          "type": "heading",
-          "page": 0,      // index of the page entry within pages[]
-          "index": 0,     // index of this heading entry within index[]
-          "sort": 1,      // sort integer for filtering
-          "cidx": 0,      // index of this entry within content[]
-        },
-        {
-          "text": "Lorem ipsum dolor",
-          "type": "text", // the type of content
-          "page": 0,      // index of the page entry within pages[]
-          "index": 1,     // index of this heading entry within index[]
-          "sort": 2,      // sort integer for filtering
-          "cidx": 1,      // index of this entry within content[]
-        }
-      ]
+      "pidx": 0,      // page index
+      "hidx": 1,      // heading index (i.e, this index)
+      "cidx": [2, 3], // content indexes start and end location
+    }
+  ],
+  "content": [
+    {
+      "text": "Default Structure",
+      "type": "heading",
+      "sort": 1, // sort integer for filtering
+      "cidx": 0, // content index (i.e, this index)
+      "hidx": 0, // index of the heading entry within heading[]
+      "pidx": 0, // index of the page entry within pages[]
+    },
+    {
+      "text": "Example text",
+      "type": "text", // the type of content
+      "sort": 2, // sort integer for filtering
+      "cidx": 1, // content index (i.e, this index)
+      "hidx": 0, // index of the heading entry within heading[]
+      "pidx": 0, // index of the page entry within pages[]
+    },
+    {
+      "text": "Second heading",
+      "type": "heading",
+      "sort": 1, // sort integer for filtering
+      "cidx": 2, // content index (i.e, this index)
+      "hidx": 1, // index of the heading entry within heading[]
+      "pidx": 0, // index of the page entry within pages[]
+    },
+    {
+      "text": "Lorem ipsum dolor",
+      "type": "text", // the type of content
+      "sort": 1, // sort integer for filtering
+      "cidx": 3, // content index (i.e, this index)
+      "hidx": 1, // index of the heading entry within heading[]
+      "pidx": 0, // index of the page entry within pages[]
     }
   ]
 }
