@@ -14,4 +14,5 @@ export const util = {
 export { defineConfig } from '11ty.ts';
 export { terser } from '@e11ty/eleventy-plugin-html-terser';
 export { sprite } from '@e11ty/eleventy-plugin-svg-sprite';
+export { fusion } from '@e11ty/eleventy-plugin-json-fusion';
 export { markdown } from '@e11ty/eleventy-plugin-markdown';
