@@ -1,6 +1,6 @@
 {
   "name": "@e11ty/eleventy-plugin-json-fusion",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "11ty plugin for generating JSON structures from markdown site files for usage by fuse.js",
   "module": "./dist/index.mjs",
   "main": "./dist/index.js",
@@ -31,7 +31,7 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup --minify",
-    "postversion": "pnpm bump",
+    "postpublish": "cd ../e11ty;",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "prettier": "@sissel/prettier-config",

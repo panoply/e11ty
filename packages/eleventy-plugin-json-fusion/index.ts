@@ -44,7 +44,7 @@ interface PluginOptions {
      *
      * @default /^({{|{%|<[a-z]|:::|> \:[a-z])/
      */
-    syntax?: RegExp[];
+    syntax?: (RegExp | string)[];
     /**
      * An array list of heading occurances to ignore from processing. Can either be regular expression
      * or a lowercase string to match against.
@@ -212,7 +212,16 @@ export function fusion (eleventyConfig: EleventyConfig, options?: PluginOptions)
   }, options)
 
   if(!('heading' in opts.ignore)) opts.ignore.heading = [];
-  if(!('syntax' in opts.ignore)) opts.ignore.syntax = [/^({{|{%|<[a-z]|:::)/g ]
+  if(!('syntax' in opts.ignore)) {
+
+    opts.ignore.syntax = [
+      /^<[a-z]/g,
+      '{{',
+      '{%',
+      ':::'
+    ]
+
+  }
 
   let pages: Page[] = [];
   let outputPath: string;
@@ -228,7 +237,11 @@ export function fusion (eleventyConfig: EleventyConfig, options?: PluginOptions)
       : match.test(heading)
   })
 
-  const ignoreSyntax = (content: string) => opts.ignore.syntax.some(match => match.test(content))
+  const ignoreSyntax = (content: string) => opts.ignore.syntax.some(match => {
+    return typeof match === 'string'
+      ? content.startsWith(match)
+      : match.test(content)
+  })
 
 
   eleventyConfig.addShortcode(opts.shortCode, FuseJson);

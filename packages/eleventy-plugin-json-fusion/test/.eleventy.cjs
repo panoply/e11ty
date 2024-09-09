@@ -14,14 +14,14 @@ module.exports = defineConfig(eleventyConfig => {
 
    eleventyConfig.addPlugin(fusion, {
     content: ['paragraph'],
-    output: 'assets/search',
+
     ignore: {
       heading: ['creating components']
     },
     codeblock: ['base', 'js', 'html', 'ts'],
     onHeading: heading => md.renderInline(heading),
     onContent: content => md.renderInline(content),
-    onOutput: (json) => console.log(json)
+   // onOutput: (json) => console.log(json[0].content.flatMap(({ content}) => content))
    })
 
   return {
