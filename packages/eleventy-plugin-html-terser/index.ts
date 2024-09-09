@@ -1,13 +1,29 @@
 import type { EleventyConfig } from '11ty.ts';
 import { minify, Options } from 'html-minifier-terser';
 
+type RunModes = 'watch' | 'build' | 'serve'
 interface TerserOptions {
   /**
-   * Only Run when `process.env.ENV` equals `prod`
-   *
-   * @default false
+   * @deprecated use `runModes` instead.
    */
-  prodOnly?: boolean;
+  onlyProd?: boolean;
+  /**
+   * Optionally choose the run modes to apply minification.
+   * Eleventy supports 3 different run modes:
+   *
+   * - `watch`
+   * - `build`
+   * - `serve`
+   *
+   * By default, minification will be applied in all modes.
+   *
+   * @default
+   * ['watch', 'build', 'serve']
+   * @example
+   * // only applies minification in build mode
+   * { runModes: ['build'] }
+   */
+  runModes?: RunModes[];
   /**
    * Options to pass to Terser
    */
@@ -17,7 +33,7 @@ interface TerserOptions {
 export function terser (
   eleventy: EleventyConfig,
   options: TerserOptions = {
-    prodOnly: false,
+    runModes: [],
     terserOptions: {
       collapseWhitespace: true,
       minifyCSS: true,
@@ -29,10 +45,13 @@ export function terser (
 ) {
 
   eleventy.namespace('html-terser', () => {
-    eleventy.addTransform('html-terser', async function (
-      content: string,
-      outputPath: string
-    ) {
+    eleventy.addTransform('html-terser', async function (content: string, outputPath: string) {
+
+      if (options?.runModes.length > 0) {
+        if (!options?.runModes.includes(this.eleventy.env.runMode)) {
+          return content
+        }
+      }
 
       try {
 

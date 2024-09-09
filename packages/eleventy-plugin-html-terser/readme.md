@@ -8,34 +8,40 @@ Because terser is dope and does dope shit.
 
 # Install
 
-The module requires [@11ty/eleventy](https://www.npmjs.com/package/@11ty/eleventy) be installed along side it.
+The [@11ty/eleventy](https://www.npmjs.com/package/@11ty/eleventy) module is a peer and needs to be installed along side it.
 
 ```cli
-pnpm add 11ty-html-terser @11ty/eleventy -D
+pnpm add @e11ty/eleventy-plugin-html-terser @11ty/eleventy -D
 ```
-
-> The `@11ty/eleventy` module is a peer. You need to install it.
 
 # Usage
 
-Pass it to the `addPlugin` within a `.eleventy.js` or `.eleventy.cjs` configuration file. Optionally use with [11ty.ts](https://github.com/panoply/e11ty/plugins/11ty.ts) wrapper for type completions.
+Pass to the `addPlugin` method of `eleventyConfig` within a `.eleventy.js` or `.eleventy.cjs` configuration file. You can provide terser options to the `terserOption` property, which will use the defaults listed below. The `runModes[]` option allows you to (optionally) control modes that minification applies (defaults to all run modes).
 
+> Optionally use with [11ty.ts](https://github.com/panoply/e11ty/packages/11ty.ts) wrapper for type completions.
+
+<!-- prettier-ignore -->
 ```ts
 const { defineConfig } = require('11ty.ts'); // Optional
-const { terser } = require('11ty-html-terser');
+const { terser } = require('@e11ty/eleventy-plugin-html-terser');
 
 module.exports = defineConfig(eleventyConfig => {
 
   eleventyConfig.addPlugin(terser, {
-    onlyProd: false, // Only Run when process.env.ENV === 'prod'
-    terseOptions: {
-      // Terser Options
+    runModes: [], // Optionally specify the run modes for minification
+    terserOptions: {
+      collapseWhitespace: true,
+      minifyCSS: true,
+      minifyJS: true,
+      removeComments: true,
+      removeRedundantAttributes: true
     }
-  })
-})
+  });
+
+});
 ```
 
-See the available minification [options](https://terser.org/html-minifier-terser/) for `terserOptions`.
+See the available minification [options](https://terser.org/html-minifier-terser/) for terser.
 
 ### License
 
