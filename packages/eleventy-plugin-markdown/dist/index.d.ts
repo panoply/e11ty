@@ -1101,18 +1101,6 @@ interface IMarkdown {
         inline(options: CodeInline): string;
     };
     /**
-     * Whether or not block quotes should apply `note` class name, e.g: `<blockquote class="note">`.
-     *
-     * @default true
-     */
-    blocknote?: boolean;
-    /**
-     * Whether or not to enable the `| md` filter for transforming markdown text using Liquid filters.
-     *
-     * @default true
-     */
-    mdfilter?: boolean;
-    /**
      * Anchors
      */
     anchors?: boolean | {

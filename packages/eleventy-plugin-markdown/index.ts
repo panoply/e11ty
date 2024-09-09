@@ -1,10 +1,12 @@
 /* eslint-disable no-unused-vars */
 import type { LiteralUnion } from 'type-fest';
 import type { EleventyConfig } from '11ty.ts';
-import type { Options } from 'markdown-it';
+import type { Options, Token } from 'markdown-it';
 import md from 'markdown-it';
 import mdcontainer from 'markdown-it-container';
-
+import mdanchor from 'markdown-it-anchor'
+import mdattrs from 'markdown-it-attrs'
+import { slug } from 'github-slugger'
 
 export type Languages = LiteralUnion<(
   | 'html'
@@ -93,11 +95,20 @@ export interface IMarkdown {
     inline(options: CodeInline): string;
   };
   /**
-   * Whether or not block quotes should apply `note` class name, e.g: `<blockquote class="note">`.
-   *
-   * @default true
+   * Anchors
    */
-  blocknote?: boolean;
+  anchors?: boolean | {
+    /**
+     * Add Attributes to output anchor elements
+     */
+    attrs?: Array<[ name: string, value: string ]>;
+    /**
+     * Plugin Options
+     *
+     * The `callback` and `slugify` options are omitted.
+     */
+    plugin?: Omit<mdanchor.AnchorOptions, 'slugify' | 'callback'>
+  };
   /**
    * Markdown IT Config
    */
@@ -211,18 +222,9 @@ function notes (tokens: md.Token[], index: number) {
 
 export function markdown (eleventy: EleventyConfig, options: IMarkdown = { options: {} }) {
 
-  const opts = Object.assign({
-    html: true,
-    linkify: true,
-    typographer: true,
-    breaks: false
-  }, options.options);
-
+  const opts = Object.assign({ html: true, linkify: true, typographer: true, breaks: false }, options.options);
   const blockFn = options?.highlight?.block;
   const inlineFn = options?.highlight?.inline;
-
-  if (typeof options?.blocknote !=='boolean') options.blocknote = true
-
   const markdown = md('default', {
     ...opts,
     highlight: (string, language) => {
@@ -232,13 +234,50 @@ export function markdown (eleventy: EleventyConfig, options: IMarkdown = { optio
     }
   });
 
-  if(inlineFn) markdown.use(codeinline(inlineFn))
-  if (options.blocknote) markdown.use(mdcontainer, 'note', { render: notes });
+  if(inlineFn) {
+
+    markdown.use(codeinline(inlineFn))
+
+  }
+
+
+
+  markdown.use(mdattrs)
+  markdown.use(mdcontainer, 'note', { render: notes });
+
+
+  if(options?.anchors !== false) {
+
+    const anchorOptions: mdanchor.AnchorOptions = { slugify: slug }
+
+    if (typeof options?.anchors === 'object') {
+
+      if(Array.isArray(options.anchors?.attrs)) {
+        anchorOptions.callback = (token: Token) => {
+          token.attrs.push(...(options.anchors as any).attrs)
+        }
+      }
+
+      if(typeof options.anchors?.plugin === 'object') {
+        Object.assign(anchorOptions, options.anchors.plugin)
+      }
+
+    }
+
+    markdown.use(mdanchor, anchorOptions);
+
+    eleventy.addFilter('anchor', value => `#${slug(value)}`);
+
+  }
 
   markdown.use(mdcontainer, 'grid', { render: grid(markdown) });
+
   markdown.disable('code');
 
   eleventy.setLibrary('md', markdown);
+  eleventy.addLiquidFilter('md', (content) => markdown.renderInline(content))
+
+
 
   return markdown;
 
