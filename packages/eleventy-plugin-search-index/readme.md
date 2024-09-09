@@ -35,6 +35,8 @@ module.exports = defineConfig(eleventyConfig => {
     shortCode:'search',
     output: '.',
     minify: false,
+    stripHtml: true,    // Strips markup tags occurrences (ignores codeblocks)
+    stripMarkdown: true, // Strips markdown syntax occurrences (ignores codeblocks)
     ignore: {
       syntax: [],   // Syntax (regexp) to ignore from processing
       heading: [],  // Headings (lowercase string) to ignore

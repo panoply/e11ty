@@ -133,6 +133,9 @@ importers:
       marked:
         specifier: ^14.1.1
         version: 14.1.1
+      nomark:
+        specifier: ^1.0.1
+        version: 1.0.1
     devDependencies:
       11ty.ts:
         specifier: workspace:^
@@ -1959,6 +1962,9 @@ packages:
   no-case@3.0.4:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
 
+  nomark@1.0.1:
+    resolution: {integrity: sha512-VciQBBMLWsQJlIZWYpt5tchoZGscURLXPDK30uHLXNLydV6jhATrlpX34ja3lflnm1nXy4m9PqoM+P/hO6eMOg==}
+
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
     engines: {node: '>=0.10.0'}
@@ -2399,6 +2405,12 @@ packages:
   statuses@2.0.1:
     resolution: {integrity: sha512-RwNA9Z/7PrK06rYLIzFMlaF+l73iwpzsqRIFgbMLbTcLD6cOao82TaWefPXQvB2fOC4AjuYSEndS7N/mTCbkdQ==}
     engines: {node: '>= 0.8'}
+
+  stophtml@1.0.3:
+    resolution: {integrity: sha512-euWs6+hMp9bZv/sb+YdpcWORDot0Z+Y29oO025MG2b7karfcHCy9HTKBXaznMo/rRCL4msA9Se2leqCxHSW1eg==}
+
+  stopmarkdown@1.0.3:
+    resolution: {integrity: sha512-LgXwDpXPKG8S/FDJ21GUysK3TIyISjQkpgeMFVEarye2NGzMKW7lhKaUh+ati7pibSOIms212IDtvZ9qQgr1wQ==}
 
   streamx@2.20.0:
     resolution: {integrity: sha512-ZGd1LhDeGFucr1CUCTBOS58ZhEendd0ttpGT3usTvosS4ntIwKN9LJFp+OeCSprsCPL14BXVRZlHGRY1V9PVzQ==}
@@ -4562,6 +4574,11 @@ snapshots:
       lower-case: 2.0.2
       tslib: 2.7.0
 
+  nomark@1.0.1:
+    dependencies:
+      stophtml: 1.0.3
+      stopmarkdown: 1.0.3
+
   normalize-path@3.0.0: {}
 
   npm-run-path@4.0.1:
@@ -5013,6 +5030,12 @@ snapshots:
   stack-trace@0.0.10: {}
 
   statuses@2.0.1: {}
+
+  stophtml@1.0.3: {}
+
+  stopmarkdown@1.0.3:
+    dependencies:
+      stophtml: 1.0.3
 
   streamx@2.20.0:
     dependencies:

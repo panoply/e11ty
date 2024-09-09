@@ -1,6 +1,7 @@
 import type { EleventyConfig, EleventyScope } from '11ty.ts';
 import marked from 'marked';
 import matter from 'gray-matter';
+import nomark from 'nomark'
 import { slug } from 'github-slugger';
 import { join, dirname } from 'node:path';
 import { readFile, writeFile, access, mkdir } from 'node:fs/promises';
@@ -34,6 +35,18 @@ interface PluginOptions {
    * @default ['bash']
    */
   codeblock?: string[];
+  /**
+   * Indicates whether to strip HTML tags from the text
+   *
+   * @default true
+   */
+  stripHtml?: boolean;
+  /**
+   * Indicates whether to strip HTML tags from the text
+   *
+   * @default true
+   */
+  stripMarkdown?: boolean;
   /**
    * Pattern matches to ignore from processing
    */
@@ -252,6 +265,8 @@ export function search (eleventyConfig: EleventyConfig, options?: PluginOptions)
     output: '',
     shortCode: 'search',
     codeblock: [],
+    stripMarkdown: true,
+    stripHtml: true,
     ignore: Object.assign({}, options?.ignore),
     content: [
       'text',
@@ -358,16 +373,19 @@ export function search (eleventyConfig: EleventyConfig, options?: PluginOptions)
 
       if (token.type === 'heading') {
 
-        if (ignoreHeading(token.text)) {
+        heading = nomark(token.text, {
+          stripHtml: opts.stripHtml,
+          stripMarkdown: opts.stripMarkdown
+        });
+
+        if (ignoreHeading(heading)) {
           heading = undefined;
           return;
         }
 
-        heading = token.text;
+        if (!records.has(heading)) {
 
-        if (!records.has(token.text)) {
-
-          records.set(token.text, []);
+          records.set(heading, []);
 
         }
 
@@ -375,20 +393,32 @@ export function search (eleventyConfig: EleventyConfig, options?: PluginOptions)
 
         if (token.type === 'paragraph' && allowText) {
 
-          if (ignoreSyntax(token.text)) return;
+          console.log(token.text)
+
+          const text = nomark(token.text, {
+            stripHtml: opts.stripHtml,
+            stripMarkdown: opts.stripMarkdown
+          });
+
+          if (ignoreSyntax(text)) return;
 
           records.get(heading).push({
-            text: token.text,
+            text,
             type: 'text',
             sort: 2
           });
 
         } else if (token.type === 'blockquote' && allowQuote) {
 
-          if (ignoreSyntax(token.raw)) return;
+          const text = nomark(token.raw, {
+            stripHtml: opts.stripHtml,
+            stripMarkdown: opts.stripMarkdown
+          });
+
+          if (ignoreSyntax(text)) return;
 
           records.get(heading).push({
-            text: token.raw.replace(/(^>|\n>)| \:.*(?=[^>])/g, ''),
+            text,
             type: 'quote',
             sort: 5
           });
@@ -404,10 +434,15 @@ export function search (eleventyConfig: EleventyConfig, options?: PluginOptions)
 
         } else if (token.type === 'list' && allowList) {
 
-          if (ignoreSyntax(token.raw)) return;
+          const text = nomark(token.raw, {
+            stripHtml: opts.stripHtml,
+            stripMarkdown: opts.stripMarkdown
+          });
+
+          if (ignoreSyntax(text)) return;
 
           records.get(heading).push({
-            text: token.raw,
+            text,
             type: 'list',
             sort: 3
           });
