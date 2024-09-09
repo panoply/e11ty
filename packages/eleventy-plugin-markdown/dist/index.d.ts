@@ -1,5 +1,6 @@
 /// <reference types="node" />
 import md, { Options } from 'markdown-it';
+import mdanchor from 'markdown-it-anchor';
 
 /**
 Matches any [primitive value](https://developer.mozilla.org/en-US/docs/Glossary/Primitive).
@@ -1105,6 +1106,27 @@ interface IMarkdown {
      * @default true
      */
     blocknote?: boolean;
+    /**
+     * Whether or not to enable the `| md` filter for transforming markdown text using Liquid filters.
+     *
+     * @default true
+     */
+    mdfilter?: boolean;
+    /**
+     * Anchors
+     */
+    anchors?: boolean | {
+        /**
+         * Add Attributes to output anchor elements
+         */
+        attrs?: Array<[name: string, value: string]>;
+        /**
+         * Plugin Options
+         *
+         * The `callback` and `slugify` options are omitted.
+         */
+        plugin?: Omit<mdanchor.AnchorOptions, 'slugify' | 'callback'>;
+    };
     /**
      * Markdown IT Config
      */
