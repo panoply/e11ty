@@ -1,4 +1,3 @@
-
 # 11ty-svg-sprite
 
 Yet another [Eleventy](https://www.11ty.dev/) plugin for handling SVG files with [html-svg-sprite](https://github.com/svg-sprite/svg-sprite).
@@ -9,22 +8,20 @@ Because the author that wrote an alternative is a pleb, so we hard-fork, refine 
 
 # Install
 
-The module requires [@11ty/eleventy](https://www.npmjs.com/package/@11ty/eleventy) be installed along side it.
+The [@11ty/eleventy](https://www.npmjs.com/package/@11ty/eleventy) module is a peer and needs to be installed along side it.
 
 ```cli
 pnpm add 11ty-svg-sprite @11ty/eleventy -D
 ```
 
-> The `@11ty/eleventy` module is a peer. You need to install it.
-
 # Usage
 
-Pass it to the `addPlugin` within a `.eleventy.js` or `.eleventy.cjs` configuration file. Optionally use with [11ty.ts](https://github.com/panoply/e11ty/plugins/11ty.ts) wrapper for type completions.
+Pass it to the `addPlugin` within a `.eleventy.js` or `.eleventy.cjs` configuration file. Optionally use with [11ty.ts](https://github.com/panoply/e11ty/packages/11ty.ts) wrapper for type completions.
 
 <!-- prettier-ignore -->
 ```ts
 const { defineConfig } = require('11ty.ts'); // Optional
-const { sprite } = require('11ty-svg-sprite');
+const { sprite } = require('@e11ty/eleventy-plugin-svg-sprite');
 
 module.exports = defineConfig(eleventyConfig => {
 
@@ -69,7 +66,7 @@ There are 2 different short codes. Place the `sprite` short code in your templat
 </body>
 ```
 
-You can inject the `<use>`reference using the `svg` short code within your project at different points, for example:
+You can inject the `<use>` reference using the `svg` short code within your project at different points, for example:
 
 ```liquid
 <section>
