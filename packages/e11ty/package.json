@@ -1,6 +1,6 @@
 {
   "name": "e11ty",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
   "scripts": {
     "dev": "tsup --watch",
@@ -9,7 +9,12 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/panoply/e11ty.git",
+    "directory": "packages/e11ty"
+  },
   "files": [
     "dist",
     "LICENSE",
@@ -31,11 +36,9 @@
   "dependencies": {
     "11ty.ts": "workspace:^",
     "@e11ty/eleventy-plugin-html-terser": "workspace:^",
+    "@e11ty/eleventy-plugin-json-fusion": "workspace:^",
     "@e11ty/eleventy-plugin-markdown": "workspace:^",
     "@e11ty/eleventy-plugin-svg-sprite": "workspace:^"
-  },
-  "devD§": {
-    "github-slugger": "^2.0.0"
   },
   "devDependencies": {
     "github-slugger": "^2.0.0"
