@@ -1,6 +1,6 @@
 {
   "name": "@e11ty/eleventy-plugin-svg-sprite",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "11ty Plugin for generating SVG Sprites for icons",
   "module": "./dist/index.mjs",
   "main": "./dist/index.js",
@@ -17,7 +17,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/panoply/e11ty/plugins/eleventy-plugin-svg-sprite"
+    "url": "https://github.com/panoply/e11ty.git",
+    "directory": "packages/eleventy-plugin-svg-sprite"
   },
   "bugs": {
     "url": "https://github.com/panoply/e11ty/issues"
@@ -40,7 +41,7 @@
       "dist"
     ]
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "devDependencies": {
     "11ty.ts": "workspace:^",
     "@types/mergerino": "^0.4.5",
