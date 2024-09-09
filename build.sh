@@ -23,7 +23,7 @@ pnpm @sprite build
 
 # FUSE
 task PLUGIN @e11ty/eleventy-plugin-search-index
-pnpm @fuse build
+pnpm @search build
 
 # E11TY
 task PLUGIN e11ty

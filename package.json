@@ -4,7 +4,7 @@
   "private": true,
   "description": "An 11ty strap containing a refined list of plugins.",
   "scripts": {
-    "dev": "conc --restart-tries 2 -n \"11ty.ts,eleventy-plugin-html-terser,eleventy-plugin-markdown,eleventy-plugin-svg-sprite,e11ty,eleventy-plugin-json-fusion\" -c \"#81D4FA,#FF69B,#9370DB,#1E90FF,#00CED1\" \"pnpm @11ty dev\" \"pnpm @terser dev\" \"pnpm @markdown dev\" \"pnpm @sprite dev\" \"pnpm @e11ty dev\"",
+    "dev": "conc --restart-tries 2 -n \"11ty.ts,eleventy-plugin-html-terser,eleventy-plugin-markdown,eleventy-plugin-svg-sprite,e11ty,eleventy-plugin-search-index\" -c \"#81D4FA,#FF69B,#9370DB,#1E90FF,#00CED1\" \"pnpm @11ty dev\" \"pnpm @terser dev\" \"pnpm @markdown dev\" \"pnpm @sprite dev\" \"pnpm @e11ty dev\"",
     "build": "pnpm --shell-mode exec \"./build.sh\"",
     "@11ty": "pnpm run -F 11ty.ts",
     "@terser": "pnpm -r run -F @e11ty/eleventy-plugin-html-terser",
