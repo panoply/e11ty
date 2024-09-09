@@ -21,4 +21,4 @@ Plugins which can be installed in isolation on per-project basis.
 - [@e11ty/eleventy-plugin-html-terser](/packages/eleventy-plugin-html-terser/)
 - [@e11ty/eleventy-plugin-svg-sprite](/packages/eleventy-plugin-svg-sprite/)
 - [@e11ty/eleventy-plugin-markdown](/packages/eleventy-plugin-markdown/)
-- [@e11ty/eleventy-plugin-json-fusion](/packages/eleventy-plugin-json-fusion/)
+- [@e11ty/eleventy-plugin-search-index](/packages/eleventy-plugin-search-index/)

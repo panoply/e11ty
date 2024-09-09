@@ -5,7 +5,7 @@ import { slug } from 'github-slugger';
 import { join, dirname } from 'node:path';
 import { readFile, writeFile, access, mkdir } from 'node:fs/promises';
 
-type ContentTypes = 'paragraph' | 'blockquote' | 'codeblock' | 'list';
+type ContentTypes = 'text' | 'quote' | 'code' | 'list';
 
 interface PluginOptions {
   /**
@@ -63,7 +63,7 @@ interface PluginOptions {
    *   'list'
    * ]
    */
-  content?: ContentTypes[]
+  content?: ContentTypes[];
   /**
    * Content is grouped according to heading occurences. For every heading, a new region
    * is generated and concatenated into the page `content` array.
@@ -100,68 +100,106 @@ interface PluginOptions {
    * >
    * > Return a `string` value to replace the heading.
    */
-  onOutput(json: Page[]): boolean | any[] | void;
+  onOutput(json: SearchModel): any;
 }
 
-interface PageContent {
-  /**
-   * Heading from a page markdown
-   */
-  heading: string;
-  /**
-   * Content within this heading region
-   */
-  content: Array<{
-    /**
-     * The contents text
-     */
-    text: string;
-    /**
-     * The type of text content
-     */
-    type: ContentTypes;
-  } | {
-    /**
-     * The contents text
-     */
-    text: string;
-    /**
-     * The type of text content
-     */
-    type: ContentTypes;
-    /**
-     * The type of text content
-     */
-    language?: string;
-  }>
-  /**
-   * Page url and anchor reference
-   */
-  url: string;
-}
 
-interface Page {
+export interface SearchPage {
   /**
    * The page title, extracted from frontmatter
    */
-  page: string;
+  title: string;
   /**
    * The page description, extracted from frontmatter
+   *
+   * @default ''
    */
   description: string;
   /**
-   * The page url, extracted from 11ty context `this.page.url`
+   * The page url
    */
   url: string;
   /**
-   * The page tags,  extracted from frontmatter
+   * The page tags
+   *
+   * @default []
    */
   tags: string[];
   /**
-   * The contents of the page
+   * The index of the containing object (i.e, where page entry exists.)
    */
-  content: Array<PageContent>;
+  index: number;
+  /**
+   * Content indexes of this page
+   */
+  content: number[]
 }
+
+export interface SearchContent {
+  /**
+   * The text to search
+   */
+  text: string;
+  /**
+   * The text content type
+   */
+  type: 'heading' | 'text' | 'quote' | 'code' | 'list';
+  /**
+   * When type is `codeblock` this will hold language name value
+   */
+  lang?: string;
+  /**
+   * The index of the page reference within `pages[]`
+   */
+  page: number;
+  /**
+   * The sort index of the text type.
+   *
+   * - `1` heading
+   * - `2` text
+   * - `3` list
+   * - `4` code
+   * - `5` quote
+   *
+   * > Use `1` for heading matches.
+   */
+  sort: number;
+  /**
+   * The index of the entry within `index[]`
+   */
+  index: number;
+  /**
+   * The index of the containing object (i.e, where this content entry exists)
+   */
+  cidx: number;
+};
+
+export interface SearchIndex {
+  /**
+   * Page url and anchor reference `/path#anchor`
+   */
+  anchor: string;
+  /**
+   * The heading in which text content exists within.
+   */
+  heading: string;
+  /**
+   * Represents all entries contained in the heading region.
+   */
+  content: SearchContent[];
+}
+
+export interface SearchModel {
+  /**
+   * Pages
+   */
+  pages: SearchPage[];
+  /**
+   * Indexes
+   */
+  index: SearchIndex[];
+}
+
 
 async function exists (path: string) {
   try {
@@ -190,7 +228,7 @@ async function write (filePath: string, data: string) {
   }
 }
 
-export function fusion (eleventyConfig: EleventyConfig, options?: PluginOptions) {
+export function search (eleventyConfig: EleventyConfig, options?: PluginOptions) {
 
   const opts: PluginOptions = Object.assign({
     onContent: null,
@@ -202,8 +240,9 @@ export function fusion (eleventyConfig: EleventyConfig, options?: PluginOptions)
     codeblock: [],
     ignore: Object.assign({}, options?.ignore),
     content: [
-      'blockquote',
-      'paragraph',
+      'text',
+      'quote',
+      'code',
       'list'
     ],
     codeblocks: [
@@ -223,12 +262,13 @@ export function fusion (eleventyConfig: EleventyConfig, options?: PluginOptions)
 
   }
 
-  let pages: Page[] = [];
+  const model: SearchModel = { pages: [], index: [] };
+
   let outputPath: string;
 
   const hasOutputHook = opts.onOutput !== null && typeof opts.onOutput === 'function';
-  const allowParagraph = opts.content.includes('paragraph');
-  const allowBlockquote = opts.content.includes('blockquote');
+  const allowText = opts.content.includes('text');
+  const allowQuote = opts.content.includes('quote');
   const allowList = opts.content.includes('list');
 
   const ignoreHeading = (heading: string) => opts.ignore.heading.some(match => {
@@ -244,20 +284,20 @@ export function fusion (eleventyConfig: EleventyConfig, options?: PluginOptions)
   })
 
 
-  eleventyConfig.addShortcode(opts.shortCode, FuseJson);
+  eleventyConfig.addShortcode(opts.shortCode, SearchIndexPlugin);
 
   eleventyConfig.on('eleventy.after', async () => {
 
-    if (pages.length > 0) {
+    if (model.index.length > 0 && model.pages.length > 0) {
 
       if (!outputPath) {
         throw new Error('[plugin-json-fusion] failed to obtain the output path');
       }
 
-      let output: string = JSON.stringify(pages, null, opts.minify ? 0 : 2);
+      let output: string = JSON.stringify(model, null, opts.minify ? 0 : 2);
 
       if (hasOutputHook) {
-        const returns = opts.onOutput(pages);
+        const returns = opts.onOutput(model);
         if (Array.isArray(returns) || typeof returns === 'object') {
           output = JSON.stringify(returns, null, opts.minify ? 0 : 2)
         }
@@ -265,13 +305,14 @@ export function fusion (eleventyConfig: EleventyConfig, options?: PluginOptions)
 
       await write(outputPath, output);
 
-      pages = [];
+      model.index = [];
+      model.pages = [];
       outputPath = undefined;
 
     }
   });
 
-  async function FuseJson (this: EleventyScope, fileName: string) {
+  async function SearchIndexPlugin (this: EleventyScope, fileName: string) {
 
     if (!outputPath && this.page.outputPath !== false) {
       const path = dirname(this.page.outputPath)
@@ -280,7 +321,7 @@ export function fusion (eleventyConfig: EleventyConfig, options?: PluginOptions)
 
     }
 
-    const records: Map<string, Array<{ text: string; type: ContentTypes; language?: string; }>> = new Map();
+    const records: Map<string, Array<{ text: string; type: ContentTypes; lang?: string; sort: number  }>> = new Map();
     const read = await readFile(this.page.inputPath);
     const parse = marked.lexer(read.toString());
     const frontmatter = parse[0].type === 'hr' ? parse.splice(0, 2).map(({ raw }) => raw).join('\n') : null;
@@ -291,10 +332,10 @@ export function fusion (eleventyConfig: EleventyConfig, options?: PluginOptions)
       title?: string;
       description?: string;
       tags?: string[];
-      fuse?: boolean;
+      search?: boolean;
     } = matter(frontmatter).data;
 
-    if (data.fuse === false) return;
+    if (data.search === false) return;
 
     let heading: string;
 
@@ -317,30 +358,33 @@ export function fusion (eleventyConfig: EleventyConfig, options?: PluginOptions)
 
       } else if (records.has(heading)) {
 
-        if (token.type === 'paragraph' && allowParagraph) {
+        if (token.type === 'paragraph' && allowText) {
 
           if (ignoreSyntax(token.text)) return;
 
           records.get(heading).push({
             text: token.text,
-            type: 'paragraph'
+            type: 'text',
+            sort: 2
           });
 
-        } else if (token.type === 'blockquote' && allowBlockquote) {
+        } else if (token.type === 'blockquote' && allowQuote) {
 
           if (ignoreSyntax(token.raw)) return;
 
           records.get(heading).push({
             text: token.raw.replace(/(^>|\n>)| \:.*(?=[^>])/g, ''),
-            type: 'blockquote'
+            type: 'quote',
+            sort: 5
           });
 
         } else if (token.type === 'code' && opts.codeblock.includes(token.lang)) {
 
           records.get(heading).push({
             text: token.text,
-            type: 'codeblock',
-            language: token.lang
+            type: 'code',
+            lang: token.lang,
+            sort: 4
           });
 
         } else if (token.type === 'list' && allowList) {
@@ -349,77 +393,84 @@ export function fusion (eleventyConfig: EleventyConfig, options?: PluginOptions)
 
           records.get(heading).push({
             text: token.raw,
-            type: 'list'
+            type: 'list',
+            sort: 3
           });
 
         }
       }
     });
 
-
-    const page: Page = {
-      page: data.title,
+    const { url } = this.page
+    const pageIndex = model.pages.length
+    model.pages.push({
+      title: data.title,
       description: data.description || '',
       tags: data.tags || [],
-      url: this.page.url,
+      url,
+      index: pageIndex,
       content: []
-    };
-
+    })
 
     for (const heading of records.keys()) {
 
-      const pathname = page.url.endsWith('/') ? page.url.slice(0, -1) : page.url;
+      const pathname = url.endsWith('/') ? url.slice(0, -1) : url;
       const cbHeading = typeof opts.onHeading === 'function' ? opts.onHeading(heading) : null
 
       if (cbHeading === false) continue;
 
-      let content: PageContent = {
-        heading: typeof cbHeading === 'string' ? cbHeading : heading,
-        content: [],
-        url: `${pathname}#${slug(heading)}`,
+      const headingName = typeof cbHeading === 'string' ? cbHeading : heading;
+      const page: SearchIndex = {
+        anchor: `${pathname}#${slug(heading)}`,
+        heading: headingName,
+        content: [
+          {
+            text: headingName,
+            type: 'heading',
+            sort: 1,
+            page: pageIndex,
+            cidx: 0,
+            index: model.index.length
+          }
+        ]
       }
 
-      records.get(heading).forEach(({ text, type, language = undefined }) => {
+      records.get(heading).forEach(({ text, type, sort, lang = undefined }) => {
 
         if (typeof text === 'string' && text.length > 0) {
 
           const cbContent = typeof opts.onContent === 'function'
-            ? opts.onContent(text, type, language)
+            ? opts.onContent(text, type, lang)
             : null
 
           if (cbContent === false) return;
 
-          if (language) {
-
-            content.content.push({
-              type,
-              text: typeof cbContent === 'string' ? cbContent : text
-            })
-
-          } else {
-
-            content.content.push({
-              type,
-              text: typeof cbContent === 'string' ? cbContent : text,
-              language
-            })
-
+          const content: SearchContent = {
+            text: typeof cbContent === 'string' ? cbContent : text,
+            type,
+            sort,
+            page: pageIndex,
+            cidx: page.content.length,
+            index: model.index.length
           }
+
+          if (lang) content.lang = lang
+
+          page.content.push(content);
+
+
         }
+
       });
 
+      if (page.content.length > 1) {
 
-      page.content.push(content);
-
-
-    }
-
-
-    if(page.content.length > 0) {
-
-      pages.push(page);
+        model.index.push(page);
+        model.pages[pageIndex].content.push(model.index.length - 1)
+      }
 
     }
+
 
     return '';
 

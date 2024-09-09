@@ -1,5 +1,5 @@
 const { defineConfig, markdown } = require('e11ty');
-const { fusion } = require('@e11ty/eleventy-plugin-json-fusion');
+const { search } = require('../dist/index.cjs');
 
 module.exports = defineConfig(eleventyConfig => {
 
@@ -12,9 +12,8 @@ module.exports = defineConfig(eleventyConfig => {
     }
   });
 
-   eleventyConfig.addPlugin(fusion, {
-    content: ['paragraph'],
-
+   eleventyConfig.addPlugin(search, {
+    content: ['text'],
     ignore: {
       heading: ['creating components']
     },

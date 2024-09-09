@@ -14,7 +14,7 @@ pnpm add e11ty -D
 
 <!-- prettier-ignore -->
 ```js
-const { defineConfig, markdown, sprite, terser, fuse } = require('e11ty');
+const { defineConfig, markdown, search, terser, fuse } = require('e11ty');
 
 module.exports = defineConfig(function (eleventyConfig) {
 
@@ -22,7 +22,7 @@ module.exports = defineConfig(function (eleventyConfig) {
 
   eleventyConfig.addPlugin(sprite, {});
   eleventyConfig.addPlugin(terser, {});
-  eleventyConfig.addPlugin(fusion, {});
+  eleventyConfig.addPlugin(search, {});
 
   return {};
 });

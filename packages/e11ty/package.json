@@ -1,6 +1,6 @@
 {
   "name": "e11ty",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "",
   "scripts": {
     "dev": "tsup --watch",
@@ -36,8 +36,8 @@
   "dependencies": {
     "11ty.ts": "workspace:^",
     "@e11ty/eleventy-plugin-html-terser": "workspace:^",
-    "@e11ty/eleventy-plugin-json-fusion": "workspace:^",
     "@e11ty/eleventy-plugin-markdown": "workspace:^",
+    "@e11ty/eleventy-plugin-search-index": "workspace:^",
     "@e11ty/eleventy-plugin-svg-sprite": "workspace:^"
   },
   "devDependencies": {

@@ -1,7 +1,7 @@
 {
-  "name": "@e11ty/eleventy-plugin-json-fusion",
-  "version": "0.0.2",
-  "description": "11ty plugin for generating JSON structures from markdown site files for usage by fuse.js",
+  "name": "@e11ty/eleventy-plugin-search-index",
+  "version": "0.0.1",
+  "description": "11ty plugin for generating JSON structures from markdown site files for creating fuzzy searches.",
   "module": "./dist/index.mjs",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,7 +18,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/panoply/e11ty.git",
-    "directory": "packages/eleventy-plugin-json-fusion"
+    "directory": "packages/eleventy-plugin-search-index"
   },
   "bugs": {
     "url": "https://github.com/panoply/e11ty/issues"

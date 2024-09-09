@@ -10,7 +10,7 @@
     "@terser": "pnpm -r run -F @e11ty/eleventy-plugin-html-terser",
     "@markdown": "pnpm run -F @e11ty/eleventy-plugin-markdown",
     "@sprite": "pnpm run -F @e11ty/eleventy-plugin-svg-sprite",
-    "@fuse": "pnpm run -F @e11ty/eleventy-plugin-json-fusion",
+    "@search": "pnpm run -F @e11ty/eleventy-plugin-search-index",
     "@e11ty": "pnpm run -F e11ty",
     "postversion": "pnpm bump",
     "test": "echo \"Error: no test specified\" && exit 1"
