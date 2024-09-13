@@ -1,14 +1,10 @@
 # @e11ty/eleventy-plugin-search-index
 
-An [Eleventy](https://www.11ty.dev/) plugin which generates JSON structures from markdown files. Use the output to implement an auto-complete search module.
+An [Eleventy](https://www.11ty.dev/) plugin which generates search index JSON structures from markdown files. Use the output to implement an auto-complete search component which runs on the client.
 
 > **NOTE**
 >
 > This plugin isn't universally compatible with all Eleventy static sites. It's tailored to my specific development approach, which means usage might require adjustments in certain contexts due to its particular requirements and methods.
-
-# Why?
-
-Fuck algolia, that's why.
 
 # Install
 
@@ -27,7 +23,7 @@ Provide the plugin via `eleventyConfig` and handling options. The `onHeading` an
 <!-- prettier-ignore -->
 ```ts
 const { defineConfig } = require('11ty.ts'); // Optional
-const  {search } = require('@e11ty/eleventy-plugin-search-index');
+const { search } = require('@e11ty/eleventy-plugin-search-index');
 
 module.exports = defineConfig(eleventyConfig => {
 
@@ -47,7 +43,7 @@ module.exports = defineConfig(eleventyConfig => {
     content: [
       'text',  // Process all paragraph content
       'quote', // Process all blockquote content
-      'list'  // Process all list content
+      'list'   // Process all list content
     ],
     onHeading (heading) {
       // return string to replace
@@ -67,11 +63,11 @@ module.exports = defineConfig(eleventyConfig => {
 
 # Example
 
-The plugin will compose a JSON file containing an array list of objects that describe the contents of markdown files. Each page requires a frontmatter reference of `title` and `permalink` for a record to be created, failure to provide these will result in the page output not being generated.
+The plugin will generate a JSON file that includes an array of objects detailing the contents of markdown files. Each object must have a `title` and `permalink` in the frontmatter to be included; without these, the page's entry will not be created in the JSON output.
 
 ### Shortcode
 
-In your layout file, include the liquid shortcode. You can customize the shortcode name but it defaults to `search`
+In your layout file, incorporate the liquid shortcode. While you have the option to rename it, by default, it is set to `search`.
 
 ```liquid
 <html>
@@ -92,7 +88,7 @@ In your layout file, include the liquid shortcode. You can customize the shortco
 
 ### Markdown File
 
-Take the following markdown file, we have provided the required frontmatter references and have some content. The plugin will read, parse and generate an object representation of the page and add it to the output array.
+Given this markdown file, which includes the necessary frontmatter references along with content, the plugin will process it, convert it into an object, and include this object in the resulting array.
 
 ```md
 ---
@@ -115,7 +111,7 @@ Lorem ipsum dolor
 
 ### JSON Output
 
-Based on the above structure, the object record generated will take the following shape. There are 3 properties in the structure, `pages` and `heading` and `content`, every reference can be associated with one another. You'll _typically_ be using the `content[]` reference for your search client.
+Based on the above structure, the following search index will be created. It will include three properties: `pages`, `heading`, and `content`. Each of these properties is interconnected. Generally, you would utilize the `content[]` reference when integrating with your search client.
 
 <!-- prettier-ignore -->
 ```jsonc
