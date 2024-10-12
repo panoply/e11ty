@@ -1,25 +1,35 @@
-const { defineConfig } = require('11ty.ts');
-const { terser } = require('@e11ty/eleventy-plugin-html-terser');
-const activityPubPlugin = require('eleventy-plugin-activity-pub');
-const lazyImages = require('eleventy-plugin-lazyimages')
+const { defineConfig, search, markdown, terser } = require('e11ty');
 
 module.exports = defineConfig(eleventyConfig => {
 
-
-  eleventyConfig.addPlugin(terser, {
-    runModes: [],
-    terserOptions: {
-      caseSensitive: true,
+    const md = markdown(eleventyConfig, {
+    options: {
+      html: true,
+      linkify: true,
+      typographer: true,
+      breaks: false
     }
+  });
+
+   eleventyConfig.addPlugin(search, {
+    content: ['text'],
+    ignore: {
+      heading: ['creating components']
+    },
+    codeblock: ['base', 'js', 'html', 'ts'],
+    onHeading: heading => md.renderInline(heading),
+    onContent: content => md.renderInline(content),
+   // onOutput: (json) => console.log(json[0].content.flatMap(({ content}) => content))
    })
 
-
-  // PLUGIN HAS NO TYPES
-  eleventy.addPlugin(lazyImages, { no_types  })
+  eleventyConfig.addPlugin(terser)
 
   return {
-    dir: {},
-    output: 'public',
+    dir: {
+      output: 'public',
+      input: 'src',
+      layouts: 'layout'
+    },
 
   }
 

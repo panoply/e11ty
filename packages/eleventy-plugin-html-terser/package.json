@@ -1,6 +1,6 @@
 {
   "name": "@e11ty/eleventy-plugin-html-terser",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Eleventy Plugin which will pass output through HTML Terser",
   "module": "./dist/index.mjs",
   "main": "./dist/index.js",
