@@ -427,6 +427,6 @@ export function markdown (eleventy: EleventyConfig, options: IMarkdown = { optio
 
 
 
-  return markdown;
+  return md;
 
 }
