@@ -1,6 +1,6 @@
 {
   "name": "@e11ty/eleventy-plugin-markdown",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "11ty wrapper around markdown-it for drop in usage and batteries included structures.",
   "module": "./dist/index.mjs",
   "main": "./dist/index.js",
