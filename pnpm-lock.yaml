@@ -29,10 +29,6 @@ importers:
         version: 8.2.4(typescript@5.5.4)
 
   packages/11ty.ts:
-    dependencies:
-      '@11ty/eleventy':
-        specifier: ^2.0.1
-        version: 2.0.1
     devDependencies:
       chokidar:
         specifier: ^3.6.0
