@@ -344,7 +344,7 @@ export function search (eleventyConfig: EleventyConfig, options?: PluginOptions)
 
   async function SearchIndexPlugin (this: EleventyScope, fileName: string) {
 
-    if (!outputPath && this.page.outputPath !== false) {
+    if (!outputPath && this.page.outputPath !== false && this.page.url !== false) {
       const path = dirname(this.page.outputPath)
       const output = path.replace(this.page.url.slice(0, -1), '')
       outputPath = join(process.cwd(), output, opts.output, fileName) + '.json';
@@ -449,7 +449,7 @@ export function search (eleventyConfig: EleventyConfig, options?: PluginOptions)
       }
     });
 
-    const { url } = this.page
+    const { url } = this.page as { url: string }
     const pidx = model.pages.length
     model.pages.push({
       title: data.title,

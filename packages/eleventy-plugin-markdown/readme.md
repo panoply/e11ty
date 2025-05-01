@@ -34,6 +34,7 @@ module.exports = defineConfig(eleventyConfig => {
 
   const md = markdown(eleventyConfig, {
     highlight: {
+      fence: ({ raw, language, escape }) => `<h1>${language}</h1><p>Override codeblock</p>`,
       block: ({ raw, language, escape }) => papyrus.highlight(raw, { language }),
       inline: ({ raw, language }) => papyrus.inline(raw, { language })
     },
@@ -64,26 +65,29 @@ The plugin provides a refined set of enhancements for both markdown and liquid.
 
 ---
 
-# Grid Container
+# Grid System
 
-Grid access is made possible using fenced containers in markdown. The `grid` keyword along with triple `:::` markers will result in encapsulate content being wrapped.
+Grid access is made possible using 2 character fenced markers in markdown. Occurences of `::` signal for `div` and the suffixed words will be added as class names result in encapsulate content being wrapped.
 
 ### Markdown Input
 
-Use the minimum of 3 `:::` colon for open/close containers and 4 (or more) for nesting depths.
+Use the minimum of 3 `::` colon for open/close containers.
 
 ```md
-:::: grid row jc-center ai-center
+:: row jc-center ai-center
+:: col-sm-6 col-md-4
 
-::: grid col-sm-6 col-md-4
+# Header
+
 Lorem ipsum dolor sit...
-:::
 
-::: grid col-6 col-md-8
-Lorem ipsum dolor sit...
-:::
+::
+:: col-6 col-md-8
 
-::::
+**bold** ipsum dolor sit...
+
+::
+::
 ```
 
 ### Markup Output
@@ -94,10 +98,13 @@ The resulting output of the above will generate the following markup.
 ```html
 <div class="row jc-center ai-center">
   <div class="col-sm-6 col-md-4">
-    Lorem ipsum dolor sit...
+    <h1>Header</h1>
+    <p>Lorem ipsum dolor sit...</p>
   </div>
   <div class="col-6 col-md-8">
-    Lorem ipsum dolor sit...
+   <p>
+    <strong>bold</strong> Lorem ipsum dolor sit...
+   </p>
   </div>
 </div>
 ```
@@ -115,6 +122,24 @@ Markdown codeblock will fire the `block()` method. Papyrus determines whether to
 const foo = 'bar'; // Comment
 ```
 ````
+
+### Fence Block
+
+You can override the default code blocks to pass something more expressive than `<pre>`, this can be done by using `fence()`. You cannot use both `fence()` and `block()`, only one is possible.
+
+```js
+markdown(eleventyConfig, {
+  highlight: {
+    fence({ language, raw, escape }) {
+      if (language.endsWith(':foo')) {
+        return `<h1>${language}</h1>`;
+      }
+
+      return papyrus.highlight(raw, { language });
+    }
+  }
+});
+```
 
 ### Inline Code
 
@@ -171,19 +196,19 @@ The heading values provided to frontmatter `anchors` will be matched and result 
 
 # Blockquote
 
-Control the `class=""` values of blockquote occurrences within markdown. Whenever a blockquote begins with a colon prefixed value will be applied as the class name. For additional classes just append with space separators.
+Control the `class=""` values of blockquote occurrences within markdown. Whenever a blockquote begins with a colon prefixed value of `:class` it will be applied as the class name.
 
 ### Markdown Example
 
 The `:class` annotation in markdown will simply add the class name/s.
 
 ```md
-> :note
+> :class note fs-xl
 > This will be a note blockquote
 
 ---
 
-> :warn
+> :class warn fw-bold
 > This will be a warning blockquote
 ```
 

@@ -2,8 +2,7 @@
 import type { LiteralUnion } from 'type-fest';
 import type { EleventyConfig } from '11ty.ts';
 import type { Options, Token } from 'markdown-it';
-import md from 'markdown-it';
-import mdcontainer from 'markdown-it-container';
+import mdit from 'markdown-it';
 import mdanchor from 'markdown-it-anchor'
 import mdattrs from 'markdown-it-attrs'
 import { slug } from 'github-slugger'
@@ -81,7 +80,6 @@ export interface IPapyrus {
   render?: 'static' | 'highlight';
 }
 
-
 export interface IMarkdown {
   /**
    * Exposes `syntax()` method.
@@ -147,7 +145,7 @@ function highlightError (language: Languages, error: string) {
 
 }
 
-function highlightCode (md: md, raw: string, language: string) {
+function highlightCode (md: mdit, raw: string, language: string) {
 
   if (language) {
     try {
@@ -167,17 +165,138 @@ function highlightCode (md: md, raw: string, language: string) {
 };
 
 
-const grid = (md: md) => function (tokens: md.Token[], idx: number) {
+interface GridToken extends Token {
+  markup: string;
+  map: [number, number];
+  attrs: [string, string][];
+}
 
-  if (tokens[idx].nesting === 1) {
-    const col = tokens[idx].info.trim().match(/^grid\s+(.*)$/);
-    if (col !== null) return /* html */`<div class="${md.utils.escapeHtml(col[1])}">`;
-  }
+function gridPlugin(md: mdit): void {
+  // Rule to tokenize :: tags
+  md.block.ruler.before('paragraph', 'grid', (
+    state: mdit.StateBlock,
+    startLine: number,
+    endLine: number,
+    silent: boolean
+  ): boolean => {
 
-  return '</div>';
+    const start: number = state.bMarks[startLine] + state.tShift[startLine];
+    const max: number = state.eMarks[startLine];
+    const lineText: string = state.src.slice(start, max);
 
+    // Match :: followed by optional class names
+    const match = lineText.match(/^::\s+([^\s].*?)?$/);
+    if (!match) return false;
+
+    const classes: string[] = match[1] ? match[1].split(/\s+/).filter(Boolean) : [];
+    const htmlTag: string = 'div'; // Always use div as the HTML tag
+
+    if (silent) return true;
+
+    let nextLine: number = startLine + 1;
+    let contentStart: number = nextLine;
+    let contentEnd: number = nextLine;
+    let nestingLevel: number = 1;
+    let token: GridToken;
+
+    // Parse until closing ::
+    while (nextLine < endLine && nestingLevel > 0) {
+      const text: string = state.src.slice(state.bMarks[nextLine] + state.tShift[nextLine], state.eMarks[nextLine]);
+      if (text.trim() === '::') {
+        nestingLevel--;
+        if (nestingLevel === 0) {
+          contentEnd = nextLine;
+          break;
+        }
+      } else if (text.match(/^::\s+/)) {
+        nestingLevel++;
+      }
+      nextLine++;
+    }
+
+    if (nestingLevel !== 0) return false;
+
+    // Create tokens for the grid container
+    token = state.push('grid_open', htmlTag, 1) as GridToken;
+    token.attrs = classes.length ? [['class', classes.join(' ')]] : [];
+    token.markup = '::';
+    token.map = [startLine, nextLine + 1];
+
+    // Parse inner content as markdown
+    if (contentStart < contentEnd) {
+      const oldParentType: string = state.parentType;
+      state.parentType = 'grid' as mdit.StateBlock.ParentType;
+      const oldLineMax: number = state.lineMax;
+      state.lineMax = contentEnd;
+
+      state.md.block.tokenize(state, contentStart, contentEnd);
+
+      state.parentType = oldParentType as mdit.StateBlock.ParentType;
+      state.lineMax = oldLineMax;
+    }
+
+    // Closing tag
+    token = state.push('grid_close', htmlTag, -1) as GridToken;
+    token.markup = '::';
+
+    state.line = nextLine + 1;
+    return true;
+  });
+
+  // Render grid tokens to HTML
+  md.renderer.rules.grid_open = (tokens: Token[], idx: number): string => {
+    const token: GridToken = tokens[idx] as GridToken;
+    const classes: string = token.attrs.find(attr => attr[0] === 'class')?.[1] || '';
+    return `<${token.tag}${classes ? ` class="${classes.trim()}"` : ''}>`;
+  };
+
+  md.renderer.rules.grid_close = (tokens: Token[], idx: number): string => {
+    const token: GridToken = tokens[idx] as GridToken;
+    return `</${token.tag}>`;
+  };
+}
+const blockquote: mdit.PluginSimple = (md) => {
+  md.core.ruler.after('block', 'blockquote_class', (state) => {
+    const tokens = state.tokens;
+
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i];
+      if (token.type !== 'blockquote_open') continue;
+
+      // Look ahead to find the inline content inside blockquote
+      let j = i + 1;
+      while (tokens[j] && tokens[j].type !== 'blockquote_close') {
+        if (tokens[j].type === 'inline') {
+          const lines = tokens[j].content.split('\n');
+          const firstLine = lines[0];
+          const match = firstLine.match(/^:class\s+(.*)$/);
+
+          if (match) {
+            const classNames = match[1].trim();
+            token.attrJoin('class', classNames);
+
+            // Remove the :class line
+            lines.shift();
+            tokens[j].content = lines.join('\n').trim();
+
+            // Optionally remove empty wrappers if content is now empty
+            if (tokens[j].content === '') {
+              // remove paragraph_open/inline/paragraph_close if empty
+              if (
+                tokens[j - 1]?.type === 'paragraph_open' &&
+                tokens[j + 1]?.type === 'paragraph_close'
+              ) {
+                tokens.splice(j - 1, 3);
+                j -= 2;
+              }
+            }
+          }
+        }
+        j++;
+      }
+    }
+  });
 };
-
 
 /**
  * Renders inline code blocks
@@ -185,7 +304,7 @@ const grid = (md: md) => function (tokens: md.Token[], idx: number) {
 const codeinline = (callback: (params: {
   raw: string;
   language: Languages
-}) => string) => function (md: md) {
+}) => string) => function (md: mdit) {
 
 
   function render (token: string) {
@@ -198,7 +317,7 @@ const codeinline = (callback: (params: {
 
   }
 
-  function scan (state: md.StateBlock) {
+  function scan (state: mdit.StateBlock) {
 
     for (let x = state.tokens.length - 1; x >= 0; x--) {
 
@@ -224,14 +343,6 @@ const codeinline = (callback: (params: {
 
 }
 
-
-
-function notes (tokens: md.Token[], index: number) {
-
-  return tokens[index].nesting === 1 ? '<blockquote class="note">' : '</blockquote>';
-
-}
-
 export function markdown (eleventy: EleventyConfig, options: IMarkdown = { options: {} }) {
 
   const opts = Object.assign({ html: true, linkify: true, typographer: true, breaks: false }, options.options);
@@ -254,33 +365,34 @@ export function markdown (eleventy: EleventyConfig, options: IMarkdown = { optio
 
   if(blockFn) {
     config.highlight = (string, language) => {
-      const syntax = highlightCode(markdownit, string, language);
+      const syntax = highlightCode(md, string, language);
       if (typeof syntax === 'object') return blockFn(syntax);
       return string;
     }
   }
 
   const inlineFn = options?.highlight?.inline;
-  const markdownit = md('default', config);
+  const md = mdit('default', config);
 
   if(fenceFn) {
-    markdownit.renderer.rules.fence = function (tokens, idx) {
+    md.renderer.rules.fence = function (tokens, idx) {
       const token = tokens[idx];
       const raw = token.content; // Raw code content
       const language = token.info.trim(); // Language from ```lang
-      const syntax = highlightCode(markdownit, raw, language)
-      return typeof syntax === 'object' ? fenceFn(syntax) : markdownit.utils.escapeHtml(raw);
+      const syntax = highlightCode(md, raw, language)
+      return typeof syntax === 'object' ? fenceFn(syntax) : md.utils.escapeHtml(raw);
     };
   }
 
   if(inlineFn) {
-    markdownit.use(codeinline(inlineFn))
+    md.use(codeinline(inlineFn))
   }
 
 
 
-  markdownit.use(mdattrs)
-  markdownit.use(mdcontainer, 'note', { render: notes });
+  md.use(mdattrs)
+  md.use(blockquote)
+  md.use(gridPlugin)
 
 
   if(options?.anchors !== false) {
@@ -301,17 +413,17 @@ export function markdown (eleventy: EleventyConfig, options: IMarkdown = { optio
 
     }
 
-    markdownit.use(mdanchor, anchorOptions);
+    md.use(mdanchor, anchorOptions);
 
     eleventy.addFilter('anchor', value => `#${slug(value)}`);
 
   }
 
-  markdownit.use(mdcontainer, 'grid', { render: grid(markdownit) });
-  markdownit.disable('code');
 
-  eleventy.setLibrary('md', markdown);
-  eleventy.addLiquidFilter('md', (content) => markdownit.renderInline(content))
+  md.disable('code');
+
+  eleventy.setLibrary('md', md);
+  eleventy.addLiquidFilter('md', (content) => md.renderInline(content))
 
 
 
