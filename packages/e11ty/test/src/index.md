@@ -17,35 +17,35 @@ Highlight as JavaScript `{js} foo.method()`, this as CSS `{css} .class { font-si
 
 ---
 
-:::: tabs
-::: tab 1
+:: row
+:: col-6
 
 hello world
 
-:::
-::: tab 2
+::
+:: col-6
 
 goodbye world!
 
-:::
-::::
+::
+::
 
 ---
 
 # Grids
 
-:::: grid row
-::: grid col-6
+:: row
+:: col-6 col-lg-9
+
+6 Columns and 9 columns
+
+::
+:: col-6
 
 6 Columns
 
-:::
-::: grid col-6
-
-6 Columns
-
-:::
-::::
+::
+::
 
 # Blockquote
 

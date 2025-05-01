@@ -14,11 +14,17 @@ pnpm add e11ty -D
 
 <!-- prettier-ignore -->
 ```js
-const { defineConfig, markdown, search, terser, fuse } = require('e11ty');
+const { defineConfig, markdown, search, terser } = require('e11ty');
 
 module.exports = defineConfig(function (eleventyConfig) {
 
-  markdown(eleventyConfig, {});
+  markdown(eleventyConfig, {
+    highlight: {
+      fence: ({ raw, language, escape }) => '',
+      block: ({ raw, language, escape }) => '',
+      inline: ({ raw, language, escape }) => ''
+    }
+  });
 
   eleventyConfig.addPlugin(sprite, {});
   eleventyConfig.addPlugin(terser, {});

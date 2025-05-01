@@ -1,7 +1,7 @@
-const { eleventy, markdown, sprite, terser } = require('e11ty');
+const { defineConfig, markdown, sprite, terser } = require('e11ty');
 const papyrus = require('papyrus');
 
-module.exports = eleventy(function (config) {
+module.exports = defineConfig(function (config) {
 
   // Markdown Intergration
   //

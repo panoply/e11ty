@@ -59,6 +59,18 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
 
+  packages/e11ty/test:
+    devDependencies:
+      '@11ty/eleventy':
+        specifier: ^3.0.0
+        version: 3.0.0
+      e11ty:
+        specifier: link:..
+        version: link:..
+      papyrus:
+        specifier: github:panoply/papyrus#sin
+        version: https://codeload.github.com/panoply/papyrus/tar.gz/79484eb8e9f66e500285ead5d0b98242ae42174b
+
   packages/eleventy-plugin-html-terser:
     dependencies:
       '@11ty/eleventy':
@@ -3057,7 +3069,7 @@ snapshots:
       chardet: 2.1.0
       chokidar: 3.6.0
       cross-spawn: 7.0.3
-      debug: 4.3.7
+      debug: 4.4.0
       dependency-graph: 1.0.0
       entities: 5.0.0
       fast-glob: 3.3.2
