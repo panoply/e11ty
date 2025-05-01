@@ -35,7 +35,15 @@ export interface CodeBlocks {
    */
   raw: string;
   /**
-   * The inner contents of the code block
+   * Escapes the the inner contents of the code block
+   *
+   * @example
+   * {
+   *   highlight: {
+   *    // this is a function
+   *    block: ({ escape }) => escape()
+   *  }
+   * }
    */
   escape(): string;
 }
@@ -80,8 +88,12 @@ export interface IMarkdown {
    */
   highlight?: {
     /**
-     * Callback function for applying Syntax Highlighting within a
-     * codeblock of markdown.
+     * Override the default fence renderer. Use instead of `block()` function to apply
+     * unique handling of codeblocks.
+     */
+    fence(options: CodeBlocks): string
+    /**
+     * Callback function for applying Syntax Highlighting within a codeblock of markdown.
      */
     block(options: CodeBlocks): string;
     /**
@@ -223,27 +235,52 @@ function notes (tokens: md.Token[], index: number) {
 export function markdown (eleventy: EleventyConfig, options: IMarkdown = { options: {} }) {
 
   const opts = Object.assign({ html: true, linkify: true, typographer: true, breaks: false }, options.options);
+  const config: Options = { ...opts }
+
+  const fenceFn = options?.highlight?.fence;
   const blockFn = options?.highlight?.block;
-  const inlineFn = options?.highlight?.inline;
-  const markdown = md('default', {
-    ...opts,
-    highlight: (string, language) => {
-      const syntax = highlightCode(markdown, string, language);
-      if (blockFn && typeof syntax === 'object') return blockFn(syntax);
+
+  if(fenceFn && blockFn) {
+    throw new Error(
+      SEP +
+      'Invalid Markdown (highlight) Options\n' +
+      'Cannot use the fence and block together. Must be one or the other!\n\n' +
+      '- Use fence() to override the default highlight behaviour\n' +
+      '- Use block() to use the the default highlight behaviour\n\n' +
+      'The fence() handler allows you to return custom markup whereas block() is confined\n' +
+      'to the <pre> tag structure.'
+    )
+  }
+
+  if(blockFn) {
+    config.highlight = (string, language) => {
+      const syntax = highlightCode(markdownit, string, language);
+      if (typeof syntax === 'object') return blockFn(syntax);
       return string;
     }
-  });
+  }
+
+  const inlineFn = options?.highlight?.inline;
+  const markdownit = md('default', config);
+
+  if(fenceFn) {
+    markdownit.renderer.rules.fence = function (tokens, idx) {
+      const token = tokens[idx];
+      const raw = token.content; // Raw code content
+      const language = token.info.trim(); // Language from ```lang
+      const syntax = highlightCode(markdownit, raw, language)
+      return typeof syntax === 'object' ? fenceFn(syntax) : markdownit.utils.escapeHtml(raw);
+    };
+  }
 
   if(inlineFn) {
-
-    markdown.use(codeinline(inlineFn))
-
+    markdownit.use(codeinline(inlineFn))
   }
 
 
 
-  markdown.use(mdattrs)
-  markdown.use(mdcontainer, 'note', { render: notes });
+  markdownit.use(mdattrs)
+  markdownit.use(mdcontainer, 'note', { render: notes });
 
 
   if(options?.anchors !== false) {
@@ -264,18 +301,17 @@ export function markdown (eleventy: EleventyConfig, options: IMarkdown = { optio
 
     }
 
-    markdown.use(mdanchor, anchorOptions);
+    markdownit.use(mdanchor, anchorOptions);
 
     eleventy.addFilter('anchor', value => `#${slug(value)}`);
 
   }
 
-  markdown.use(mdcontainer, 'grid', { render: grid(markdown) });
-
-  markdown.disable('code');
+  markdownit.use(mdcontainer, 'grid', { render: grid(markdownit) });
+  markdownit.disable('code');
 
   eleventy.setLibrary('md', markdown);
-  eleventy.addLiquidFilter('md', (content) => markdown.renderInline(content))
+  eleventy.addLiquidFilter('md', (content) => markdownit.renderInline(content))
 
 
 

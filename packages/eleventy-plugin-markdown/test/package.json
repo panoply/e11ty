@@ -1,0 +1,17 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "pnpm eleventy --config=.eleventy.cjs --serve --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@e11ty/eleventy-plugin-markdown": "link:..",
+    "papyrus": "github:panoply/papyrus#sin"
+  }
+}
