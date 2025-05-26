@@ -14,5 +14,5 @@ export const util = {
 export { defineConfig } from '11ty.ts';
 export { terser } from '@e11ty/eleventy-plugin-html-terser';
 export { sprite } from '@e11ty/eleventy-plugin-svg-sprite';
-export { search } from '@e11ty/eleventy-plugin-search-index';
+export { search, SearchContent, SearchHeading, SearchIndex, SearchPage } from '@e11ty/eleventy-plugin-search-index';
 export { markdown } from '@e11ty/eleventy-plugin-markdown';
