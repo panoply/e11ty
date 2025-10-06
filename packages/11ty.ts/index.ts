@@ -704,7 +704,13 @@ interface CollectionsAPI {
  */
 export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
   [method: string]: any;
-
+  logger: {
+    logWithOptions(options: {
+      prefix: string
+      type: string,
+      message: string,
+    }): void
+  },
   /**
    * Customize the watchIgnores `Set`
    *
