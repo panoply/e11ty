@@ -711,7 +711,7 @@ interface CollectionsAPI {
 /**
  * Options for sending a message to the log stream
  *
- * [11ty Source](https://github.com/11ty/eleventy/blob/0c89371802c45dcdc635c797192ccd2ad96693c9/src/Util/ConsoleLogger.js#L56-L64)
+ * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L59-L67)
  */
 interface LogOptions {
   message: string;
@@ -719,6 +719,65 @@ interface LogOptions {
   type: LogType;
   color: string;
   force: boolean;
+}
+
+/**
+ * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js)
+ */
+interface ConsoleLogger {
+  /**
+   * Flag for if logging is enabled
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L23)
+   */
+  isLoggingEnabled(): boolean;
+  /**
+   * Log a message with default options
+   */
+  log(msg: string): void;
+  /**
+   * Configurable method to write to the Eleventy log stream
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L68)
+   */
+  logWithOptions(options: LogOptions): void;
+  /**
+   * Log a message with defaults but force to the console
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L73)
+   */
+  forceLog(msg: string): void;
+  /**
+   * Log a message with type="error" and color="red"
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L78)
+   */
+  info(msg: string): void;
+  /**
+   * Log a message with type="warn" and color="yellow"
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L83)
+   */
+  warn(msg: string): void;
+  /**
+   * Log a message with type="error" and color="red"
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L88)
+   */
+  error(msg: string): void;
+  /**
+   * Formats the message to log.
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L119)
+   *
+   * @defaults ```
+   * type = 'log'
+   * chalkColor = undefined
+   * forceToConsole = false
+   * prefix = '[11ty]'
+   * ```
+   */
+  message(message: string, type: LogType, chalkColor?: string, forceToConsole?: boolean, prefix?: string): void;
 }
 
 /**
@@ -733,14 +792,7 @@ export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
    *
    * [11ty Source](https://github.com/11ty/eleventy/blob/0c89371802c45dcdc635c797192ccd2ad96693c9/src/CoreMinimal.js#L253)
    */
-  logger: {
-    /**
-     * Configurable method to write to the Eleventy log stream
-     *
-     * [11ty Source](https://github.com/11ty/eleventy/blob/0c89371802c45dcdc635c797192ccd2ad96693c9/src/Util/ConsoleLogger.js#L65)
-     */
-    logWithOptions(options: LogOptions): void;
-  },
+  logger: ConsoleLogger,
   /**
    * Customize the watchIgnores `Set`
    *
