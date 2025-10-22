@@ -48,6 +48,18 @@ type EventNames = LiteralUnion<
   | 'eleventy.resourceDeleted'
   , string>;
 
+/**
+ * Log Levels
+ *
+ * [11ty Source](https://github.com/11ty/eleventy/blob/0c89371802c45dcdc635c797192ccd2ad96693c9/src/Util/ConsoleLogger.js#L8)
+ */
+type LogType = LiteralUnion<
+  | 'error'
+  | 'log'
+  | 'warn'
+  | 'info'
+  , string>;
+
 type AsyncFilter = (error: unknown | null, result?: any) => void;
 
 /**
@@ -714,18 +726,21 @@ export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
      * Configurable method to write to the Eleventy log stream
      *
      * [11ty Source](https://github.com/11ty/eleventy/blob/0c89371802c45dcdc635c797192ccd2ad96693c9/src/Util/ConsoleLogger.js#L56-L64)
+     *
      * @typedef LogOptions
      * @property {string} message
      * @property {string=} prefix
-     * @property {LogType=} type
+     * @property {LogType} type
      * @property {string=} color
      * @property {boolean=} force
      * @param {LogOptions} options
      */
     logWithOptions(options: {
-      prefix: string;
-      type: string;
       message: string;
+      prefix: string;
+      type: LogType;
+      color: string;
+      force: boolean;
     }): void;
   },
   /**
