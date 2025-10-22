@@ -708,6 +708,18 @@ interface CollectionsAPI {
   getFilteredByGlob(glob: string | string[]): EleventySuppliedData[];
 }
 
+/**
+ * Options for sending a message to the log stream
+ *
+ * [11ty Source](https://github.com/11ty/eleventy/blob/0c89371802c45dcdc635c797192ccd2ad96693c9/src/Util/ConsoleLogger.js#L56-L64)
+ */
+interface LogOptions {
+  message: string;
+  prefix: string;
+  type: LogType;
+  color: string;
+  force: boolean;
+}
 
 /**
  * [Eleventy](https://www.11ty.dev/)
@@ -725,23 +737,9 @@ export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
     /**
      * Configurable method to write to the Eleventy log stream
      *
-     * [11ty Source](https://github.com/11ty/eleventy/blob/0c89371802c45dcdc635c797192ccd2ad96693c9/src/Util/ConsoleLogger.js#L56-L64)
-     *
-     * @typedef LogOptions
-     * @property {string} message
-     * @property {string=} prefix
-     * @property {LogType} type
-     * @property {string=} color
-     * @property {boolean=} force
-     * @param {LogOptions} options
+     * [11ty Source](https://github.com/11ty/eleventy/blob/0c89371802c45dcdc635c797192ccd2ad96693c9/src/Util/ConsoleLogger.js#L65)
      */
-    logWithOptions(options: {
-      message: string;
-      prefix: string;
-      type: LogType;
-      color: string;
-      force: boolean;
-    }): void;
+    logWithOptions(options: LogOptions): void;
   },
   /**
    * Customize the watchIgnores `Set`
