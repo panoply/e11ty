@@ -13,7 +13,7 @@ type TemplateEngines = LiteralUnion<
   | 'haml'
   | 'pug'
   | 'jstl'
-, string>;
+  , string>;
 
 type TemplateFormats = LiteralUnion<
   | 'html'
@@ -30,13 +30,13 @@ type TemplateFormats = LiteralUnion<
   | 'njk'
   | 'hbs'
   | 'mustache'
-, string>
+  , string>;
 
 type EventNamesDeprecated = LiteralUnion<
   | 'beforeBuild'
   | 'beforeWatch'
   | 'afterBuild'
-, string>;
+  , string>;
 
 type EventNames = LiteralUnion<
   | 'eleventy.before'
@@ -46,7 +46,19 @@ type EventNames = LiteralUnion<
   | 'eleventy.resourceModified'
   | 'eleventy.resourceAdded'
   | 'eleventy.resourceDeleted'
-, string>;
+  , string>;
+
+/**
+ * Log Levels
+ *
+ * [11ty Source](https://github.com/11ty/eleventy/blob/0c89371802c45dcdc635c797192ccd2ad96693c9/src/Util/ConsoleLogger.js#L8)
+ */
+type LogType = LiteralUnion<
+  | 'error'
+  | 'log'
+  | 'warn'
+  | 'info'
+  , string>;
 
 type AsyncFilter = (error: unknown | null, result?: any) => void;
 
@@ -244,7 +256,7 @@ interface EleventyData {
 interface URLPattern {
   test(input?: URLPatternInit | string, baseURL?: string): boolean;
   exec(input?: URLPatternInit | string, baseURL?: string): {
-    inputs: [ URLPatternInit | string];
+    inputs: [URLPatternInit | string];
     protocol: URLPatternComponentResult;
     username: URLPatternComponentResult;
     password: URLPatternComponentResult;
@@ -297,9 +309,9 @@ export type OnRequestCallbackParams = {
    * Pattern Groups will include URLPattern matches e.g. `/foo/zach => { name: "zach" }`
    */
   patternGroups: Record<string, {
-    [key: string]: string
-  }>
-}
+    [key: string]: string;
+  }>;
+};
 
 export interface EleventyScope {
   /**
@@ -449,7 +461,7 @@ export interface EleventyServer {
    * @default
    * false
    */
-  useCache?: boolean
+  useCache?: boolean;
   /**
    * An object mapping a URLPattern pathname to a callback function for on-request processing
    *
@@ -502,14 +514,14 @@ export interface EleventyBrowserSync extends EleventyServer {
    * false
    */
   ghostMode?: boolean | {
-      clicks?: boolean | undefined;
-      scroll?: boolean | undefined;
-      forms?: {
-        inputs?: boolean;
-        submit?: boolean;
-        toggles?: boolean;
+    clicks?: boolean | undefined;
+    scroll?: boolean | undefined;
+    forms?: {
+      inputs?: boolean;
+      submit?: boolean;
+      toggles?: boolean;
     } | boolean | undefined;
-  }
+  };
 }
 
 interface EleventDataExtension {
@@ -696,6 +708,77 @@ interface CollectionsAPI {
   getFilteredByGlob(glob: string | string[]): EleventySuppliedData[];
 }
 
+/**
+ * Options for sending a message to the log stream
+ *
+ * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L59-L67)
+ */
+interface LogOptions {
+  message: string;
+  prefix: string;
+  type: LogType;
+  color: string;
+  force: boolean;
+}
+
+/**
+ * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js)
+ */
+interface ConsoleLogger {
+  /**
+   * Flag for if logging is enabled
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L23)
+   */
+  isLoggingEnabled(): boolean;
+  /**
+   * Log a message with default options
+   */
+  log(msg: string): void;
+  /**
+   * Configurable method to write to the Eleventy log stream
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L68)
+   */
+  logWithOptions(options: LogOptions): void;
+  /**
+   * Log a message with defaults but force to the console
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L73)
+   */
+  forceLog(msg: string): void;
+  /**
+   * Log a message with type="error" and color="red"
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L78)
+   */
+  info(msg: string): void;
+  /**
+   * Log a message with type="warn" and color="yellow"
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L83)
+   */
+  warn(msg: string): void;
+  /**
+   * Log a message with type="error" and color="red"
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L88)
+   */
+  error(msg: string): void;
+  /**
+   * Formats the message to log.
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/v3/src/Util/ConsoleLogger.js#L119)
+   *
+   * @defaults ```
+   * type = 'log'
+   * chalkColor = undefined
+   * forceToConsole = false
+   * prefix = '[11ty]'
+   * ```
+   */
+  message(message: string, type: LogType, chalkColor?: string, forceToConsole?: boolean, prefix?: string): void;
+}
 
 /**
  * [Eleventy](https://www.11ty.dev/)
@@ -704,13 +787,18 @@ interface CollectionsAPI {
  */
 export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
   [method: string]: any;
-
+  /**
+   * Instance of the internal logger used by Eleventy
+   *
+   * [11ty Source](https://github.com/11ty/eleventy/blob/0c89371802c45dcdc635c797192ccd2ad96693c9/src/CoreMinimal.js#L253)
+   */
+  logger: ConsoleLogger,
   /**
    * Customize the watchIgnores `Set`
    *
    * [11ty Docs](https://www.11ty.dev/docs/watch-serve/#configuration-api)
    */
-  watchIgnores: Set<string>
+  watchIgnores: Set<string>;
   /**
    * In order to maximize user-friendliness to beginners,
    * Eleventy will show each file it processes and the output file.
@@ -772,7 +860,7 @@ export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
    *
    * [11ty Docs](https://www.11ty.dev/docs/virtual-templates/)
    */
-  addTemplate(virtualPath: string, content: string, data: { [key: string]: any }): void;
+  addTemplate(virtualPath: string, content: string, data: { [key: string]: any; }): void;
   addTemplate(virtualPath: string, callback: (data: any) => any): void;
   /**
    * Use a full deep merge when combining the Data Cascade.
@@ -808,7 +896,7 @@ export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
     this: EleventyScope,
     data: any,
     content: string
-  ) => false | string | undefined): void
+  ) => false | string | undefined): void;
   /**
    * Watch JavaScript Dependencies
    *
@@ -856,7 +944,7 @@ export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
    *
    * [11ty Docs](https://www.11ty.dev/docs/dates/#configuration-api-for-custom-date-parsing)
    */
-  addDateParsing(callback: (this: EleventyScope, date: Date) => any): void
+  addDateParsing(callback: (this: EleventyScope, date: Date) => any): void;
   /**
    * When using Template and Directory Specific Data Files, to prevent file name conflicts
    * with non-Eleventy files in the project directory, we scope these files with a unique-to-Eleventy
@@ -927,7 +1015,7 @@ export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
   addCollection(
     name: string,
     callback: (this: EleventyScope, collectionApi: CollectionsAPI) => any | PromiseLike<any>
-  ): void
+  ): void;
   /**
    * Opt-out of using .gitignore
    *
@@ -949,7 +1037,7 @@ export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
    *
    * [11ty Docs](https://www.11ty.dev/docs/copy/#emulate-passthrough-copy-during-serve)
    */
-  setServerPassthroughCopyBehavior(key: LiteralUnion<"passthrough", string>): void
+  setServerPassthroughCopyBehavior(key: LiteralUnion<"passthrough", string>): void;
   /**
    * You can programmatically add and delete ignores in your configuration file.
    *
@@ -1002,7 +1090,7 @@ export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
    *
    * [11ty Docs](https://www.11ty.dev/docs/copy/)
    */
-  addPassthroughCopy(path: string | { [input: string]: string }): void;
+  addPassthroughCopy(path: string | { [input: string]: string; }): void;
   /**
    * Universal filters can be added in a single place and are available to
    * multiple template engines, simultaneously. This is currently supported
@@ -1103,7 +1191,7 @@ export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
    * @param dir
    * 	Any valid directory, defaults to `.`
    */
-  setInputDirectory(dir?: string): void
+  setInputDirectory(dir?: string): void;
   /**
    * Set the directory for includes.
    *
@@ -1165,7 +1253,7 @@ export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
    *
    * [11ty Docs](https://www.11ty.dev/docs/permalinks/#permalinks-without-file-extensions)
    */
-  configureErrorReporting(options: { allowMissingExtensions: boolean }): void
+  configureErrorReporting(options: { allowMissingExtensions: boolean; }): void;
   /**
    * Starting in Eleventy 3.0, the `pkg`, `eleventy`, `page`, `content`, and `collections` properties are now frozen
    * from external modification to prevent accidental overrides interfering with Eleventy internals.
@@ -1174,7 +1262,7 @@ export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
    *
    * [11ty Docs](https://www.11ty.dev/docs/data-eleventy-supplied/#frozen-data)
    */
-  setFreezeReservedData(option: boolean): void
+  setFreezeReservedData(option: boolean): void;
 }
 
 interface ReturnConfig {
