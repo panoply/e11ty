@@ -1265,7 +1265,7 @@ export interface EleventyConfig extends Filters, ShortCodes, PluginExtend {
   setFreezeReservedData(option: boolean): void;
 }
 
-interface ReturnConfig {
+export interface ReturnConfig {
   dir?: {
     /**
      * Input directory
